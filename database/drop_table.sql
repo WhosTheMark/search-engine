@@ -1,0 +1,2 @@
+DROP TABLE indx;
+DROP TABLE word;
