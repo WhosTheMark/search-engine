@@ -1,5 +1,5 @@
-sudo -u postgres psql -f create_user.sql 
-sudo -u postgres psql -f create_database.sql
-export PGPASSWORD=search-engine
-psql -d ridb -U searchengine -f create_table.sql
+sudo -u postgres createuser --superuser $USER
+sudo -u postgres psql
+sudo -u postgres createdb $USER
+
 

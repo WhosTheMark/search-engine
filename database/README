@@ -1,0 +1,8 @@
+Run set_up.sh
+You will get into psql terminal type: "\password [username]"
+where userame is the linux username and type a password.
+Then exit by typing "\q"
+Run create_tables.sh
+
+Read more about it here: 
+https://help.ubuntu.com/community/PostgreSQL#Alternative_Server_Setup

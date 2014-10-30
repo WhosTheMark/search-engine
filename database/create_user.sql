@@ -1,1 +1,1 @@
-CREATE USER searchEngine WITH CREATEDB PASSWORD 'search-engine';
+CREATE USER searchEngine WITH PASSWORD 'searchengine';
