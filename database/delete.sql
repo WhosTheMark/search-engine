@@ -1,0 +1,2 @@
+DELETE FROM indx;
+DELETE FROM word;

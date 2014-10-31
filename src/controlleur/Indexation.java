@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 
 public class Indexation {
 	
-	private static final String separatorRegExpr = "( |,|;|\\.|:|!|\\?)+";
+	private static final String separatorRegExpr = "( |’|'|\\p{Punct})+";
 	
 	public static void createInverseFile(File file, int document){
 		
@@ -20,12 +20,13 @@ public class Indexation {
 		
 		for (String word : words){
 			
+			String lowerCaseWord = word.toLowerCase();
 			int frequency = 1;
 			
-			if(inverseFile.containsKey(word))
-				frequency = inverseFile.get(word);
-			
-			inverseFile.put(word, frequency);		
+			if(inverseFile.containsKey(lowerCaseWord))
+				frequency = 1 + inverseFile.get(lowerCaseWord);
+				
+			inverseFile.put(lowerCaseWord, frequency);		
 		}
 		
 		DBDriver.storeInverseFile(inverseFile, document);
