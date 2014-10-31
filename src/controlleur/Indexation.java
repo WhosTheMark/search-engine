@@ -15,6 +15,8 @@ public class Indexation {
 	
 	public static void createInverseFile(File file, int document){
 		
+		DBDriver.storeDocument(document,file);
+		
 		String[] words = parse(file);
 		HashMap<String, Integer> inverseFile = new HashMap<String, Integer>();
 		

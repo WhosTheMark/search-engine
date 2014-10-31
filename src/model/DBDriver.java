@@ -1,5 +1,6 @@
 package model;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,22 @@ import java.util.Map.Entry;
 public class DBDriver {
 
 	private static Connection conn = ConnectionBuilder.getConnection();
+	
+	public static void storeDocument(int idDocument, File document){
+		
+		try {
+			
+			String strStmt = "INSERT INTO document VALUES (?,?);";
+			PreparedStatement prepstmt = conn.prepareStatement(strStmt);
+			prepstmt.setInt(1, idDocument);
+			prepstmt.setString(2,document.getName());
+			prepstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}		
+	}
+	
 	
 	public static void storeInverseFile(HashMap<String, Integer> inverseFile, int document){
 		

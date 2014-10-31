@@ -3,6 +3,12 @@ CREATE TABLE word (
     CONSTRAINT PK_WORD PRIMARY KEY (id_word)
 );
 
+CREATE TABLE document (
+    id_document    numeric     NOT NULL,
+    name        varchar(10) NOT NULL,
+    CONSTRAINT PK_DOCUMENT PRIMARY KEY (id_document)
+);
+
 -- index is a reserved word of SQL
 CREATE TABLE indx (
     id_word     varchar(50) NOT NULL,
@@ -10,5 +16,8 @@ CREATE TABLE indx (
     weight      numeric     NOT NULL,
     CONSTRAINT PK_INDEX PRIMARY KEY (id_word,document),
     CONSTRAINT FK_INDEX_WORD FOREIGN KEY (id_word)
-        REFERENCES word (id_word)
+        REFERENCES word (id_word),
+    CONSTRAINT FK_INDEX_DOCUMENT FOREIGN KEY (document)
+        REFERENCES document (id_document)
 );
+
