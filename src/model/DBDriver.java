@@ -61,6 +61,7 @@ public class DBDriver {
 			}
 			
 		} catch (SQLException e) {
+			System.out.println("ERROR: " + word);
 			System.out.println(e.getMessage());
 		}		
 	}

@@ -1,2 +1,3 @@
 DELETE FROM indx;
+DELETE FROM document;
 DELETE FROM word;

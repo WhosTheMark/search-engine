@@ -8,34 +8,52 @@ import model.DBDriver;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class Indexation {
 	
-	private static final String separatorRegExpr = "( |’|'|\\p{Punct})+";
+	private static final String separatorRegExpr = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
+	 
 	
 	public static void createInverseFile(File file, int document){
 		
 		DBDriver.storeDocument(document,file);
 		
-		String[] words = parse(file);
+		Elements elems = parse(file);
+		
 		HashMap<String, Integer> inverseFile = new HashMap<String, Integer>();
 		
-		for (String word : words){
+		for (Element e : elems){
 			
-			String lowerCaseWord = word.toLowerCase();
-			int frequency = 1;
-			
-			if(inverseFile.containsKey(lowerCaseWord))
-				frequency = 1 + inverseFile.get(lowerCaseWord);
-				
-			inverseFile.put(lowerCaseWord, frequency);		
+			String elemStr = e.ownText();
+			String[] words = elemStr.split(separatorRegExpr);
+			calculateFrequencies(words,inverseFile);
+
 		}
 		
 		DBDriver.storeInverseFile(inverseFile, document);
 		
 	}
 	
-	private static String[] parse(File fileToParse){
+	private static void calculateFrequencies(String[] words, HashMap<String, Integer> inverseFile){
+		
+		for(String word: words) {
+			
+			if (!word.isEmpty()){
+				String lowerCaseWord = word.toLowerCase();
+				int frequency = 1;
+				
+				if(inverseFile.containsKey(lowerCaseWord))
+					frequency = 1 + inverseFile.get(lowerCaseWord);
+					
+				inverseFile.put(lowerCaseWord, frequency);
+			}
+		}
+		
+	}
+	
+	private static Elements parse(File fileToParse){
 		
 		Document doc;
 		
@@ -44,11 +62,11 @@ public class Indexation {
 			
 		} catch (IOException e) {
 			e.printStackTrace();
-			return new String[0];
+			return null;
 		}
 		
-		String text = doc.text();
-		return text.split(separatorRegExpr);		
+		Elements elems = doc.select("*");
+		return elems;		
 	}
 
 }

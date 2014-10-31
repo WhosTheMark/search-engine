@@ -11,6 +11,7 @@ public class Main {
 		
 		System.out.println("Index process started.");
 		int i = 0;
+		
 		for (File file: listOfFiles) {
 			System.out.println("Indexing file: " + file.getName());
 			Indexation.createInverseFile(file, i++);
