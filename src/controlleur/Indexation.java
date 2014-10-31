@@ -4,26 +4,48 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import model.DBDriver;
+
 import org.jsoup.Jsoup;
-import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class Indexation {
 	
-	public static HashMap<String, Integer> parse(File fileToParse){
+	private static final String separatorRegExpr = "( |,|;|\\.|:|!|\\?)+";
+	
+	public static void createInverseFile(File file, int document){
 		
-		HashMap<String, Integer> reverseFile = new HashMap<String, Integer>();
+		String[] words = parse(file);
+		HashMap<String, Integer> inverseFile = new HashMap<String, Integer>();
 		
-		try {
-			Document doc = Jsoup.parse(fileToParse, "UTF-8", "");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (String word : words){
+			
+			int frequency = 1;
+			
+			if(inverseFile.containsKey(word))
+				frequency = inverseFile.get(word);
+			
+			inverseFile.put(word, frequency);		
 		}
 		
-		return reverseFile;
+		DBDriver.storeInverseFile(inverseFile, document);
+		
+	}
+	
+	private static String[] parse(File fileToParse){
+		
+		Document doc;
+		
+		try {
+			doc = Jsoup.parse(fileToParse, "UTF-8", "");
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new String[0];
+		}
+		
+		String text = doc.text();
+		return text.split(separatorRegExpr);		
 	}
 
 }
