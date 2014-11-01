@@ -16,14 +16,15 @@ import org.jsoup.select.Elements;
 public class Indexation {
 	
 	private static final String separatorRegExpr = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
-	 
 	
 	public static void createInverseFile(File file, int document, TreeSet<String> emptyWordsSet){
 		
+		//Insert a document in the database
 		DBDriver.storeDocument(document,file);
 		Elements elems = parse(file);
 		HashMap<String, Integer> inverseFile = new HashMap<String, Integer>();
 		
+		//For each tag get the text and store it in the inverse file.
 		for (Element e : elems){
 			
 			String elemStr = e.ownText();
@@ -32,6 +33,7 @@ public class Indexation {
 
 		}
 		
+		//Store the indexes in the database
 		DBDriver.storeInverseFile(inverseFile, document);
 	}
 	
@@ -40,11 +42,18 @@ public class Indexation {
 		
 		for(String word: words) {
 			
+			//If the word is not an empty string or an empty word we store it
 			if (!word.isEmpty() && !emptyWordsSet.contains(word)){
 				
+				//All the words are lower case'd
 				String lowerCaseWord = word.toLowerCase();
 				int frequency = 1;
 				
+				/*
+				 * If the word is not already in the inverse file the 
+				 * inverse file then its frequency is 1, else is the
+				 * frequency it had +1
+				 */
 				if(inverseFile.containsKey(lowerCaseWord))
 					frequency = 1 + inverseFile.get(lowerCaseWord);
 					
@@ -66,15 +75,16 @@ public class Indexation {
 			return null;
 		}
 		
+		//Select all the tags from the HTML file
 		Elements elems = doc.select("*");
 		return elems;		
 	}
 	
-	public static TreeSet<String> createEmptyWordsSet(){
+	public static TreeSet<String> createEmptyWordsSet(File file){
 		
-		File file = new File("extra/stopliste.txt");
 		Scanner scanner;
 		
+		//Try to open the file
 		try {
 			scanner = new Scanner(file);
 		
@@ -87,13 +97,13 @@ public class Indexation {
 		scanner.useDelimiter(separatorRegExpr);
 		TreeSet<String> set = new TreeSet<String>();
 		
+		//For each word in the file add it to the tree
 		while (scanner.hasNext()){
 			String word = scanner.next();
 			set.add(word);
 		}
 		
 		return set;
-		
 	}
 
 }

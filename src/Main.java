@@ -10,8 +10,10 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 		
 		File folder = new File("extra/CORPUS");
+		File emptyWordsfile = new File("extra/stopliste.txt");
+		
 		File[] listOfFiles = folder.listFiles();
-		TreeSet<String> emptyWordsSet = Indexation.createEmptyWordsSet();
+		TreeSet<String> emptyWordsSet = Indexation.createEmptyWordsSet(emptyWordsfile);
 		
 		System.out.println("Index process started.");
 		int i = 0;
