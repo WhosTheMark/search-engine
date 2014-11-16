@@ -22,16 +22,17 @@ public class Indexation {
 
     private static final Logger LOGGER = Logger.getLogger(Indexation.class.getName());
     private static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
+    private static final int WORD_MAX_LENGTH = 7;
 
     // To avoid instantiation
     private Indexation() {
     }
 
-    public static void indexFiles(File emptyWordsfile, File folder){
+    public static void indexFiles(File stopWordsfile, File folder){
 
         File[] listOfFiles = folder.listFiles();
-        Set<String> emptyWordsSet = Indexation
-                .createEmptyWordsSet(emptyWordsfile);
+        Set<String> stopWordsSet = Indexation
+                .createStopWordsSet(stopWordsfile);
 
         LOGGER.log(Level.INFO, "Index process started.");
 
@@ -39,7 +40,7 @@ public class Indexation {
 
         for (File file : listOfFiles) {
             LOGGER.log(Level.INFO, "Indexing file: " + file.getName());
-            createInverseFile(file, i++, emptyWordsSet);
+            createInverseFile(file, i++, stopWordsSet);
         }
 
         LOGGER.log(Level.INFO, "Index finished.");
@@ -50,7 +51,7 @@ public class Indexation {
      * Create an inverse file of a document and store it in the database
      */
     private static void createInverseFile(File file, int documentId,
-            Set<String> emptyWordsSet) {
+            Set<String> stopWordsSet) {
 
         LOGGER.log(Level.FINE, "Creating inverse file for document "
                 + file.getName());
@@ -72,7 +73,7 @@ public class Indexation {
 
             String elemStr = e.ownText();
             String[] words = elemStr.split(SEPARATOR_REGEXP);
-            calculateFrequencies(words, inverseFile, emptyWordsSet);
+            calculateFrequencies(words, inverseFile, stopWordsSet);
 
         }
 
@@ -84,16 +85,22 @@ public class Indexation {
      * the inverse file.
      */
     private static void calculateFrequencies(String[] words,
-            Map<String, Integer> inverseFile, Set<String> emptyWordsSet) {
+            Map<String, Integer> inverseFile, Set<String> stopWordsSet) {
 
         for (String word : words) {
 
             LOGGER.log(Level.FINEST, "Calculating frequency for word " + word);
 
-            // If the word is not an empty string or an empty word we store it
-            if (!word.isEmpty() && !emptyWordsSet.contains(word)) {
+            // If the word is not an empty string or an stop word we store it
+            if (!word.isEmpty() && !stopWordsSet.contains(word)) {
 
                 String lowerCaseWord = word.toLowerCase();
+
+                // Truncate string if it is too long
+                if (lowerCaseWord.length() > WORD_MAX_LENGTH){
+                    lowerCaseWord = lowerCaseWord.substring(0,WORD_MAX_LENGTH);
+                }
+
                 int frequency = 1;
 
                 /*
@@ -127,9 +134,9 @@ public class Indexation {
     /*
      * Creates the set of words to not be included in the database
      */
-    private static Set<String> createEmptyWordsSet(File file) {
+    private static Set<String> createStopWordsSet(File file) {
 
-        LOGGER.log(Level.FINE, "Building empty words set.");
+        LOGGER.log(Level.FINE, "Building stop words set.");
         Scanner scanner;
         Set<String> set = new TreeSet<String>();
 
@@ -137,7 +144,7 @@ public class Indexation {
             scanner = new Scanner(file);
 
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Could not find empty word file", e);
+            LOGGER.log(Level.SEVERE, "Could not find stop list file", e);
             return set;
         }
 

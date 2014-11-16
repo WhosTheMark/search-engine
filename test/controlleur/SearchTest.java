@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import model.RelevantDocument;
+import model.calculators.InnerProductCalculator;
 
 import org.junit.Test;
 
@@ -18,7 +19,8 @@ public class SearchTest {
         String[] array = new String[2];
         array[0] = "personnes";
         array[1] = "Intouchables";
-        List<RelevantDocument> result = Search.getRelevantDocs(array);
+        Search search = new Search(new InnerProductCalculator());
+        List<RelevantDocument> result = search.getRelevantDocs(array);
 
         for (RelevantDocument doc : result) {
 

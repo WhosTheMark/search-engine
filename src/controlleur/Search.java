@@ -1,6 +1,5 @@
 package controlleur;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -8,7 +7,6 @@ import java.util.logging.Logger;
 
 import model.DBDriver;
 import model.RelevantDocument;
-import model.calculators.InnerProductCalculator;
 import model.calculators.RelevanceCalculator;
 
 /*
@@ -19,32 +17,31 @@ public class Search {
     private static final Logger LOGGER = Logger.getLogger(Search.class.getName());
 
     // Implements strategy pattern
-    private static final RelevanceCalculator CALCULATOR = new InnerProductCalculator();
+    private RelevanceCalculator calculator;
 
-    // To avoid instantiation
-    private Search() {
+
+    public Search(RelevanceCalculator calculator) {
+        this.calculator = calculator;
     }
 
     /*
      * Get the relevant documents of a request
      */
-    public static List<RelevantDocument> getRelevantDocs(String[] keywords) {
+    public List<RelevantDocument> getRelevantDocs(String[] keywords) {
 
         LOGGER.log(Level.FINE, "Calculating relevant documents.");
-
-        //List that accumulates relevant documents 
-        List<RelevantDocument> docsAcc = new ArrayList<RelevantDocument>();
 
         for (String keyword : keywords) {
 
             List<RelevantDocument> relevantDocs = DBDriver.getRelevantDocs(keyword);
-            docsAcc = CALCULATOR.calculateRelevance(docsAcc, relevantDocs);
+            calculator.calculateRelevance(relevantDocs);
 
         }
 
-        Collections.sort(docsAcc);
+        List<RelevantDocument> relvDocs = calculator.finalizeCalcs();
+        Collections.sort(relvDocs);
 
-        return docsAcc;
+        return relvDocs;
     }
 
 }

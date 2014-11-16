@@ -9,6 +9,7 @@ import model.RelevantDocument;
  */
 public interface RelevanceCalculator {
 
-    public List<RelevantDocument> calculateRelevance(List<RelevantDocument> docs,
-            List<RelevantDocument> freqs);
+    public void calculateRelevance(List<RelevantDocument> relevDocs);
+
+    public List<RelevantDocument> finalizeCalcs();
 }

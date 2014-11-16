@@ -15,25 +15,30 @@ public class InnerProductCalculator implements RelevanceCalculator {
     private static final Logger LOGGER = Logger.getLogger(
             InnerProductCalculator.class.getName());
 
+    private List<RelevantDocument> accumDocs;
+
+    public InnerProductCalculator(){
+        accumDocs = new ArrayList<RelevantDocument>();
+    }
+
     /*
      * Calculates the relevance of documents using a list that accumulates the
      * result and a list of the newly obtained frequencies.
      */
     @Override
-    public List<RelevantDocument> calculateRelevance(List<RelevantDocument> accum,
-            List<RelevantDocument> freqs) {
+    public void calculateRelevance(List<RelevantDocument> relevDocs) {
 
-        LOGGER.log(Level.FINER, "Calculating frquencies using inner product.");
+        LOGGER.log(Level.FINER, "Calculating relevance using inner product.");
 
         List<RelevantDocument> result = new ArrayList<RelevantDocument>();
         int i = 0;
         int j = 0;
 
         //Merge the two lists ordered by the id of the document
-        while (i < accum.size() && j < freqs.size()) {
+        while (i < accumDocs.size() && j < relevDocs.size()) {
 
-            RelevantDocument elem1 = accum.get(i);
-            RelevantDocument elem2 = freqs.get(j);
+            RelevantDocument elem1 = accumDocs.get(i);
+            RelevantDocument elem2 = relevDocs.get(j);
 
             if (elem1.getDocumentId() < elem2.getDocumentId()) {
                 result.add(elem1);
@@ -51,10 +56,10 @@ public class InnerProductCalculator implements RelevanceCalculator {
             }
         }
 
-        addLastElems(i,accum,result);
-        addLastElems(j,freqs,result);
+        addLastElems(i,accumDocs,result);
+        addLastElems(j,relevDocs,result);
 
-        return result;
+        accumDocs = result;
 
     }
 
@@ -72,6 +77,11 @@ public class InnerProductCalculator implements RelevanceCalculator {
             RelevantDocument elem = list.get(i);
             result.add(elem);
         }
+    }
+
+    @Override
+    public List<RelevantDocument> finalizeCalcs() {
+        return accumDocs;
     }
 
 }
