@@ -4,15 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import model.database.DBDriver;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,9 +31,14 @@ public class Indexation {
     public static void indexFiles(File stopWordsfile, File folder){
 
         File[] listOfFiles = folder.listFiles();
+
+        if(listOfFiles == null) {
+            LOGGER.log(Level.SEVERE, "Folder " + folder.getName() + "does not exists.");
+            return;
+        }
+
         Arrays.sort(listOfFiles);
-        Set<String> stopWordsSet = Indexation
-                .createStopWordsSet(stopWordsfile);
+        Set<String> stopWordsSet = Indexation.createStopWordsSet(stopWordsfile);
 
         LOGGER.log(Level.INFO, "Index process started.");
 
@@ -61,7 +62,6 @@ public class Indexation {
         LOGGER.log(Level.FINE, "Creating inverse file for document "
                 + file.getName());
 
-        DBDriver.storeDocument(documentId, file);
         Elements elems;
 
         try {
@@ -71,56 +71,23 @@ public class Indexation {
             return;
         }
 
-        Map<String, Integer> inverseFile = new HashMap<String, Integer>();
+        InverseFile invFile = new InverseFile(documentId, file.getName(), stopWordsSet);
 
         // For each tag get the text and store it in the inverse file.
         for (Element e : elems) {
 
             String elemStr = e.ownText();
             String[] words = elemStr.split(SEPARATOR_REGEXP);
-            calculateFrequencies(words, inverseFile, stopWordsSet);
-
+            invFile.addWord(words);
         }
 
-        DBDriver.storeInverseFile(inverseFile, documentId);
-    }
-
-    /*
-     * Calculates the frequency of each word in a HTML tag and stores it in
-     * the inverse file.
-     */
-    private static void calculateFrequencies(String[] words,
-            Map<String, Integer> inverseFile, Set<String> stopWordsSet) {
-
-        for (String word : words) {
-
-            LOGGER.log(Level.FINEST, "Calculating frequency for word " + word);
-
-            // If the word is not an empty string or an stop word we store it
-            if (!word.isEmpty() && !stopWordsSet.contains(word)) {
-
-                String lowerCaseWord = treatKeyword(word);
-
-                int frequency = 1;
-
-                /*
-                 * If the word is not already in the inverse file
-                 * then its frequency is 1, else is the frequency it had + 1
-                 */
-                if (inverseFile.containsKey(lowerCaseWord)) {
-                    frequency = 1 + inverseFile.get(lowerCaseWord);
-                }
-
-                inverseFile.put(lowerCaseWord, frequency);
-            }
-        }
-
+        invFile.storeInDB();
     }
 
     /*
      * Modify a keyword to store it in the database.
      */
-    public static String treatKeyword(String keyWord) {
+    public static String normalizeWord(String keyWord) {
 
         String lowerCaseWord = keyWord.toLowerCase();
 
@@ -168,7 +135,8 @@ public class Indexation {
         // For each word in the file add it to the set
         while (scanner.hasNext()) {
             String word = scanner.next();
-            set.add(word);
+            String normalizedWord = normalizeWord(word);
+            set.add(normalizedWord);
         }
 
         return set;

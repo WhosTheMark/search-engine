@@ -14,7 +14,7 @@ public class SearchTest {
     public void testFile(){
 
         File file = new File("extra/queries.txt");
-        Search search = new Search(new InnerProductCalculator());
+        Search search = new Search(new InnerProductCalculator(), "extra/results");
         search.searchFromFile(file);
 
     }

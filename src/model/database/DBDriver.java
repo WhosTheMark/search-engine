@@ -1,14 +1,11 @@
 package model.database;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,21 +26,24 @@ public class DBDriver {
     /*
      * Store a document in the database.
      */
-    public static void storeDocument(int idDocument, File document) {
+    public static boolean storeDocument(int idDocument, String documentName) {
 
-        LOGGER.log(Level.FINE, "Storing document " + document.getName());
+        LOGGER.log(Level.FINE, "Storing document " + documentName);
 
         try {
 
             String strStmt = "INSERT INTO " + DOC_TABLE + " VALUES (?,?);";
             PreparedStatement prepstmt = CONNECTION.prepareStatement(strStmt);
             prepstmt.setInt(1, idDocument);
-            prepstmt.setString(2, document.getName());
+            prepstmt.setString(2, documentName);
             prepstmt.executeUpdate();
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Could not add a document to database.", e);
+            return false;
         }
+
+        return true;
     }
 
     /*
@@ -65,7 +65,7 @@ public class DBDriver {
     /*
      * Store a word in the database.
      */
-    private static void storeWord(String word) {
+    public static void storeWord(String word) {
 
         LOGGER.log(Level.FINER, "Storing word " + word);
 
@@ -90,7 +90,7 @@ public class DBDriver {
     /*
      * Store an entry of the inverse file in the database.
      */
-    private static void insertEntry(String word, int document, int weight) {
+    public static void storeInverseEntry(String word, int document, int weight) {
 
         LOGGER.log(Level.FINER, "Inserting index entry with word: " + word
                 + " document id: " + document + " and weight: " + weight);
@@ -109,22 +109,6 @@ public class DBDriver {
             LOGGER.log(Level.SEVERE, "Could not store index in the database.",
                     e);
         }
-    }
-
-    /*
-     * Store an inverse file in the database
-     */
-    public static void storeInverseFile(Map<String, Integer> inverseFile,
-            int document) {
-
-        LOGGER.log(Level.FINE, "Storing inverse file for document with id: "
-                + document);
-
-        for (Entry<String, Integer> elem : inverseFile.entrySet()) {
-            storeWord(elem.getKey());
-            insertEntry(elem.getKey(), document, elem.getValue());
-        }
-
     }
 
     /*

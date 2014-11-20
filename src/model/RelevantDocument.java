@@ -1,5 +1,9 @@
 package model;
 
+import java.util.List;
+
+import model.database.DBDriver;
+
 /*
  * Stores the data of a relevant document.
  */
@@ -53,6 +57,10 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
 
         return this.weight == doc.weight;
 
+    }
+
+    public static List<RelevantDocument> getRelevantDocsFromDB(String keyword){
+        return DBDriver.getRelevantDocs(keyword);
     }
 
 }

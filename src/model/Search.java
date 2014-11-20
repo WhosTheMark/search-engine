@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import model.calculators.RelevanceCalculator;
-import model.database.DBDriver;
 
 /*
  * Searches relevant documents in the database.
@@ -18,14 +17,15 @@ import model.database.DBDriver;
 public class Search {
 
     private static final Logger LOGGER = Logger.getLogger(Search.class.getName());
-    private static final String RESULT_FOLDER = "results";
+    private String resultFolder;
 
     // Implements strategy pattern to use different calculators
     private RelevanceCalculator calculator;
 
 
-    public Search(RelevanceCalculator calculator) {
+    public Search(RelevanceCalculator calculator, String resultFolder) {
         this.calculator = calculator;
+        this.resultFolder = resultFolder;
     }
 
     /*
@@ -44,10 +44,11 @@ public class Search {
                     + keyword + ".");
 
             // Modifying the keyword to match the ones in the database.
-            String treatedKeyword = Indexation.treatKeyword(keyword);
+            String normalizedKeyword = Indexation.normalizeWord(keyword);
 
             // Get the relevant documents from the database
-            List<RelevantDocument> relevantDocs = DBDriver.getRelevantDocs(treatedKeyword);
+            List<RelevantDocument> relevantDocs =
+                    RelevantDocument.getRelevantDocsFromDB(normalizedKeyword);
 
             // Calculate relevance
             calculator.calculateRelevance(relevantDocs);
@@ -80,7 +81,7 @@ public class Search {
         }
 
         // Get the relevant documents of a query and store them in a file.
-        for(int i = 0; scanner.hasNextLine(); ++i){
+        for(int i = 1; scanner.hasNextLine(); ++i){
 
             String query = scanner.nextLine();
             List<RelevantDocument> docs = getRelevantDocs(query);
@@ -95,7 +96,7 @@ public class Search {
      */
     private boolean createResultFolder() {
 
-        File folder = new File(RESULT_FOLDER);
+        File folder = new File(resultFolder);
 
         if (!folder.exists()) {
             LOGGER.log(Level.CONFIG, "Creating results foder.");
@@ -122,7 +123,7 @@ public class Search {
         // Opens a file or creates it to store the results.
         try {
 
-            writer = new PrintWriter("results/qrelQ" + queryID + ".txt");
+            writer = new PrintWriter(resultFolder + "/qrelQ" + queryID + ".txt");
 
         } catch (FileNotFoundException e) {
 
