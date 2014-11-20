@@ -1,22 +1,16 @@
 package model;
 
+import java.util.List;
+
 public class Evaluation {
 
     private float precision5 = 0;
     private float precision10 = 0;
     private float precision25 = 0;
-    private int docsAnalyzed = 0;   //Number of files found by the search engine
-    private int docsMatched = 0;    //Number of files that are actually relevant
+    private int totalDocsFound = 0;
+    private int relevantDocsFound = 0;
 
     public Evaluation(){
-    }
-
-    public Evaluation(float precision5, float precision10, float precision25,
-            int total) {
-        super();
-        this.precision5 = precision5 / (float)total;
-        this.precision10 = precision10 / (float)total;
-        this.precision25 = precision25 / (float)total;
     }
 
     public float getPrecision5() {
@@ -43,30 +37,62 @@ public class Evaluation {
         this.precision25 = precision25;
     }
 
-    public void match(){
-        ++docsAnalyzed;
-        ++docsMatched;
-        update();
+    /*
+     * Document found is a relevant doc
+     */
+    public void foundRelevantDoc(){
+        ++totalDocsFound;
+        ++relevantDocsFound;
+        updatePrecision();
     }
 
-    public void noMatch(){
-        ++docsAnalyzed;
-        update();
+    public void foundNotRelevantDoc(){
+        ++totalDocsFound;
+        updatePrecision();
     }
 
-    private void update() {
+    private void updatePrecision() {
 
-        switch(docsAnalyzed){
+        switch(totalDocsFound){
 
         case 5:
-            precision5 = (float)docsMatched/ (float)docsAnalyzed;
+            precision5 =  (float)relevantDocsFound / (float)totalDocsFound;
             break;
         case 10:
-            precision10 = (float)docsMatched/ (float)docsAnalyzed;
+            precision10 = (float)relevantDocsFound / (float)totalDocsFound;
+            break;
         case 25:
-            precision25 = (float)docsMatched/ (float)docsAnalyzed;
+            precision25 = (float)relevantDocsFound / (float)totalDocsFound;
             break;
         }
+    }
+
+    public static Evaluation calculateAverage(List<Evaluation> list){
+
+        Evaluation evaluation = new Evaluation();
+        sumPrecisions(evaluation, list);
+        divideByTotal(evaluation, list);
+
+        return evaluation;
+    }
+
+    private static void sumPrecisions(Evaluation evaluation,
+            List<Evaluation> list) {
+
+        for(Evaluation eval: list){
+            evaluation.precision5 += eval.getPrecision5();
+            evaluation.precision10 += eval.getPrecision10();
+            evaluation.precision25 += eval.getPrecision25();
+        }
+    }
+
+    private static void divideByTotal(Evaluation evaluation,
+            List<Evaluation> list) {
+
+        int total = list.size();
+        evaluation.precision5 = evaluation.precision5 / (float)total;
+        evaluation.precision10 = evaluation.precision10 / (float)total;
+        evaluation.precision25 = evaluation.precision25 / (float)total;
     }
 
     public String toString(){

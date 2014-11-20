@@ -17,6 +17,7 @@ public class DBDriver {
     private static final Connection CONNECTION = ConnectionBuilder.getConnection();
     private static final String WORD_TABLE = "word";
     private static final String INDEX_TABLE = "indx";
+    private static final String INDEX_TF_IDF_TABLE = "tf_idf_index";
     private static final String DOC_TABLE = "document";
 
     // To avoid instantiation
@@ -46,6 +47,28 @@ public class DBDriver {
         return true;
     }
 
+    public static int getNumberOfDocuments(){
+
+        LOGGER.log(Level.FINEST, "Getting the number of docs");
+
+        String strQuery = "SELECT COUNT(*) FROM " + DOC_TABLE + ";";
+        ResultSet rs;
+        try {
+            PreparedStatement prepstmt = CONNECTION.prepareStatement(strQuery);
+            rs = prepstmt.executeQuery();
+
+            if(!rs.next()){
+                return 0;
+            }
+
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "There is not a table " + DOC_TABLE 
+                    + " in the database.", e);
+            return -1;
+        }
+    }
     /*
      * Checks if a wordExists in the database.
      */
@@ -90,19 +113,28 @@ public class DBDriver {
     /*
      * Store an entry of the inverse file in the database.
      */
-    public static void storeInverseEntry(String word, int document, int weight) {
+    public static void storeInverseTfEntry(String word, int document, float weight) {
 
+        storeInverseEntry(word, document, weight, INDEX_TABLE);
+    }
+
+    public static void storeInverseTfIdfEntry(String word, int document, float weight) {
+        storeInverseEntry(word, document, weight, INDEX_TF_IDF_TABLE);
+    }
+
+    private static void storeInverseEntry(String word, int document,
+            float weight, String table) {
         LOGGER.log(Level.FINER, "Inserting index entry with word: " + word
                 + " document id: " + document + " and weight: " + weight);
 
-        String strStmt = "INSERT INTO " + INDEX_TABLE + " VALUES (?,?,?);";
+        String strStmt = "INSERT INTO " + table + " VALUES (?,?,?);";
 
         try {
 
             PreparedStatement prepstmt = CONNECTION.prepareStatement(strStmt);
             prepstmt.setString(1, word);
             prepstmt.setInt(2, document);
-            prepstmt.setInt(3, weight);
+            prepstmt.setFloat(3, weight);
             prepstmt.execute();
 
         } catch (SQLException e) {
@@ -112,14 +144,30 @@ public class DBDriver {
     }
 
     /*
-     * Returns the list of relevant document of a word, the list is ordered in the
-     * same way documents are ordered in the database.
+     * Returns the list of relevant document of a word using Term Frequency.
      */
-    public static List<RelevantDocument> getRelevantDocs(String word) {
+    public static List<RelevantDocument> getRelevantDocsTf(String word) {
 
         LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
 
-        String strQuery = "SELECT * FROM " + INDEX_TABLE + " , " + DOC_TABLE
+        List<RelevantDocument> list = getRelevantDocs(word,INDEX_TABLE);
+        return list;
+    }
+
+    /*
+     * Returns the list of relevant document of a word using tf-idf.
+     */
+    public static List<RelevantDocument> getRelevantDocsTfIdf(String word) {
+
+        LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
+
+        List<RelevantDocument> list = getRelevantDocs(word,INDEX_TF_IDF_TABLE);
+        return list;
+    }
+
+    private static List<RelevantDocument> getRelevantDocs(String word, String table) {
+
+        String strQuery = "SELECT * FROM " + table + " , " + DOC_TABLE
                 + " WHERE id_document = document AND id_word=? "
                 + "order by id_document;";
         PreparedStatement prepstmt;
@@ -137,7 +185,6 @@ public class DBDriver {
                     e);
             list = new ArrayList<RelevantDocument>();
         }
-
         return list;
     }
 
@@ -158,7 +205,6 @@ public class DBDriver {
                     weight);
 
             list.add(aux);
-
         }
 
         return list;
@@ -180,6 +226,8 @@ public class DBDriver {
             prepstmt.setString(1, WORD_TABLE);
             prepstmt.executeUpdate();
             prepstmt.setString(1, DOC_TABLE);
+            prepstmt.executeUpdate();
+            prepstmt.setString(1, INDEX_TF_IDF_TABLE);
             prepstmt.executeUpdate();
 
         } catch (SQLException e) {

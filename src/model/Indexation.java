@@ -15,6 +15,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+
 public class Indexation {
 
     private static final Logger LOGGER = Logger.getLogger(Indexation.class.getName());
@@ -38,7 +39,12 @@ public class Indexation {
         }
 
         Arrays.sort(listOfFiles);
-        Set<String> stopWordsSet = Indexation.createStopWordsSet(stopWordsfile);
+        Set<String> stopWordsSet = createStopWordsSet(stopWordsfile);
+
+        startIndexing(listOfFiles, stopWordsSet);
+    }
+
+    private static void startIndexing(File[] listOfFiles,  Set<String> stopWordsSet) {
 
         LOGGER.log(Level.INFO, "Index process started.");
 
@@ -50,7 +56,6 @@ public class Indexation {
         }
 
         LOGGER.log(Level.INFO, "Index finished.");
-
     }
 
     /*
@@ -72,16 +77,21 @@ public class Indexation {
         }
 
         InverseFile invFile = new InverseFile(documentId, file.getName(), stopWordsSet);
+        addElems(elems, invFile);
+        invFile.storeInDB();
+    }
 
-        // For each tag get the text and store it in the inverse file.
+    /*
+     * Takes the text in the tags and adds them to the inverse file.
+     */
+    private static void addElems(Elements elems, InverseFile invFile) {
+
         for (Element e : elems) {
 
             String elemStr = e.ownText();
             String[] words = elemStr.split(SEPARATOR_REGEXP);
             invFile.addWord(words);
         }
-
-        invFile.storeInDB();
     }
 
     /*
@@ -131,15 +141,17 @@ public class Indexation {
         }
 
         scanner.useDelimiter(SEPARATOR_REGEXP);
+        addWordsToSet(scanner, set);
 
-        // For each word in the file add it to the set
+        return set;
+    }
+
+    private static void addWordsToSet(Scanner scanner, Set<String> set) {
+
         while (scanner.hasNext()) {
             String word = scanner.next();
             String normalizedWord = normalizeWord(word);
             set.add(normalizedWord);
         }
-
-        return set;
     }
-
 }

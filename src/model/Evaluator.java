@@ -16,20 +16,28 @@ public class Evaluator {
 
     private static final Logger LOGGER = Logger.getLogger(Evaluator.class.getName());
     private static final String DOC_NAME = "D[0-9]+\\.html";
+    private static final int MAX_PRECISION = 25;
 
-    private Evaluation finalEvaluation;
+    // Stores the queries that have already been evaluated.
     private List<Evaluation> queriesEvaluations;
-    private File qrelsFolder;
-    private File resultFolder;
 
-    public Evaluator(File qrelsFolder, File resultFolder){
-        this.qrelsFolder = qrelsFolder;
-        this.resultFolder = resultFolder;
-        this.finalEvaluation = new Evaluation();
+    public Evaluator(){
         this.queriesEvaluations = new ArrayList<Evaluation>();
     }
 
-    public void evaluate(){
+    public List<Evaluation> getQueriesEvaluations() {
+        return queriesEvaluations;
+    }
+
+    public Evaluation calculateFinalEvaluation(){
+
+        return Evaluation.calculateAverage(queriesEvaluations);
+    }
+
+    /*
+     * Evaluate the results using predetermined qrel files.
+     */
+    public void evaluate(File qrelsFolder, File resultFolder){
 
         File[] qrelFiles;
         File[] resultFiles;
@@ -49,6 +57,9 @@ public class Evaluator {
 
     }
 
+    /*
+     * Compare the results of all queries using predetermined qrel files.
+     */
     private void compareResults(File[] qrelFiles, File[] resultFiles) {
 
         int qrelsLen = qrelFiles.length;
@@ -60,12 +71,16 @@ public class Evaluator {
 
         for (int i = 0; i < qrelsLen && i < resultLen; ++i){
 
-            Set<String> relevantSet = getRelevantSet(qrelFiles[i]);
-            evaluateQueryResult(relevantSet,resultFiles[i]);
+            Set<String> relevantDocSet = getRelevantDocSet(qrelFiles[i]);
+            Evaluation eval = evaluateQueryResult(relevantDocSet,resultFiles[i]);
+            this.queriesEvaluations.add(eval);
         }
     }
 
-    private void evaluateQueryResult(Set<String> relevantSet, File result) {
+    /*
+     * Evaluate a single query
+     */
+    private Evaluation evaluateQueryResult(Set<String> relevantDocSet, File result) {
 
         Scanner scanner;
 
@@ -73,55 +88,39 @@ public class Evaluator {
             scanner = new Scanner(result);
         } catch (FileNotFoundException e) {
             LOGGER.log(Level.SEVERE, "This should not happen.", e);
-            return;
+            return null;
         }
 
-        Evaluation eval = calculateEvaluation(relevantSet, scanner);
+        return calculateEvaluation(relevantDocSet, scanner);
 
-        this.queriesEvaluations.add(eval);
     }
 
-    private Evaluation calculateEvaluation(Set<String> relevantSet,
+    /*
+     * Calculates an evaluation using the set of relevant documents
+     * and the result file.
+     */
+    private Evaluation calculateEvaluation(Set<String> relevantDocSet,
             Scanner scanner) {
 
         Evaluation eval = new Evaluation();
         int i = 0;
 
-        while (scanner.hasNext(DOC_NAME) && i < 25) {
+        while (scanner.hasNext(DOC_NAME) && i < MAX_PRECISION) {
             String doc = scanner.next(DOC_NAME);
-            if(relevantSet.contains(doc)){
-                eval.match();
+            if(relevantDocSet.contains(doc)){
+                eval.foundRelevantDoc();
             } else {
-                eval.noMatch();
+                eval.foundNotRelevantDoc();
             }
             ++i;
         }
         return eval;
     }
 
-    public Evaluation calculateFinalEvaluation(){
-
-        float precision5 = 0;
-        float precision10 = 0;
-        float precision25 = 0;
-
-        for(Evaluation eval: queriesEvaluations){
-            precision5 += eval.getPrecision5();
-            precision10 += eval.getPrecision10();
-            precision25 += eval.getPrecision25();
-        }
-
-        int total = queriesEvaluations.size();
-        finalEvaluation = new Evaluation(precision5,precision10,precision25,total);
-
-        return finalEvaluation;
-    }
-
-    public List<Evaluation> getQueriesEvaluations() {
-        return queriesEvaluations;
-    }
-
-    private static Set<String> getRelevantSet(File qrel){
+    /*
+     * Get the relevant docs in the qrel.
+     */
+    private static Set<String> getRelevantDocSet(File qrel){
 
         Scanner scanner;
         Set<String> set = new HashSet<String>();
@@ -134,6 +133,15 @@ public class Evaluator {
         }
 
         scanner.useLocale(Locale.FRANCE);
+        addDocs(scanner, set);
+
+        return set;
+    }
+
+    /*
+     * Add a relevant doc to the set.
+     */
+    private static void addDocs(Scanner scanner, Set<String> set) {
 
         while(scanner.hasNext(DOC_NAME)){
             String doc = scanner.next(DOC_NAME);
@@ -143,8 +151,6 @@ public class Evaluator {
                 set.add(doc);
             }
         }
-
-        return set;
     }
 
     private static File[] listFiles(File folder) throws FileNotFoundException{

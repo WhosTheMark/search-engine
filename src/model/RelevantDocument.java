@@ -11,9 +11,9 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
 
     private int documentId;
     private String documentName;
-    private int weight = 0;
+    private float weight = 0;
 
-    public RelevantDocument(int documentId, String documentName, int weight) {
+    public RelevantDocument(int documentId, String documentName, float weight) {
         this.documentId = documentId;
         this.documentName = documentName;
         this.weight = weight;
@@ -27,23 +27,23 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
         return documentName;
     }
 
-    public int getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 
     @Override
     public int compareTo(RelevantDocument o) {
-        return o.weight - this.weight;
+        return (int) (o.weight - this.weight);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
-        return prime + weight;
+        return (int) (prime + weight);
     }
 
     @Override
@@ -54,13 +54,48 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
         }
 
         RelevantDocument doc = (RelevantDocument) obj;
-
         return this.weight == doc.weight;
-
     }
 
-    public static List<RelevantDocument> getRelevantDocsFromDB(String keyword){
-        return DBDriver.getRelevantDocs(keyword);
+    /*
+     * Get tf-idf relevant documents of a keyword from the database
+     */
+    public static List<RelevantDocument> getRelevantDocs(String keyword){
+
+        List<RelevantDocument> listTfIdf = DBDriver.getRelevantDocsTfIdf(keyword);
+
+        // If there is no data of tf-idf in the database, we calculate it.
+        if (listTfIdf.isEmpty()) {
+            List<RelevantDocument> listTf = DBDriver.getRelevantDocsTf(keyword);
+            int numDocs = DBDriver.getNumberOfDocuments();
+            listTfIdf = calculateTfIdf(keyword,listTf,numDocs);
+        }
+
+        return listTfIdf;
+    }
+
+
+    private static List<RelevantDocument> calculateTfIdf (String keyword,
+            List<RelevantDocument> list, int numDocs){
+
+        double idf = Math.log((float) (numDocs) / (float)(1 + list.size()));
+
+        for(RelevantDocument doc : list){
+            doc.weight *= idf;
+        }
+
+        storeTfIdf(keyword, list);
+        return list;
+    }
+
+    /*
+     * Store the results for memoization
+     */
+    private static void storeTfIdf(String keyword, List<RelevantDocument> list) {
+
+        for(RelevantDocument doc : list){
+            DBDriver.storeInverseTfIdfEntry(keyword,doc.documentId,doc.weight);
+        }
     }
 
 }

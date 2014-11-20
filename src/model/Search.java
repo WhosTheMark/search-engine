@@ -28,10 +28,8 @@ public class Search {
         this.resultFolder = resultFolder;
     }
 
-    /*
-     * Get the relevant documents of a query
-     */
-    public List<RelevantDocument> getRelevantDocs(String query) {
+
+    public List<RelevantDocument> getRelevantDocsOfQuery(String query) {
 
         LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
                 + query + ".");
@@ -39,19 +37,7 @@ public class Search {
         String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
 
         for (String keyword : keywords) {
-
-            LOGGER.log(Level.FINER, "Calculating relevant documents for the keyword "
-                    + keyword + ".");
-
-            // Modifying the keyword to match the ones in the database.
-            String normalizedKeyword = Indexation.normalizeWord(keyword);
-
-            // Get the relevant documents from the database
-            List<RelevantDocument> relevantDocs =
-                    RelevantDocument.getRelevantDocsFromDB(normalizedKeyword);
-
-            // Calculate relevance
-            calculator.calculateRelevance(relevantDocs);
+            getRelevantDocsOfKeyword(keyword);
         }
 
         List<RelevantDocument> relvDocs = calculator.finalizeCalcs();
@@ -60,14 +46,24 @@ public class Search {
         return relvDocs;
     }
 
-    /*
-     * Search queries from a file.
-     */
-    public void searchFromFile(File file){
+
+    private void getRelevantDocsOfKeyword(String keyword) {
+
+        LOGGER.log(Level.FINER, "Calculating relevant documents for the keyword "
+                + keyword + ".");
+
+        String normalizedKeyword = Indexation.normalizeWord(keyword);
+
+        List<RelevantDocument> relevantDocs =
+                RelevantDocument.getRelevantDocs(normalizedKeyword);
+        calculator.calculateRelevance(relevantDocs);
+    }
+
+
+    public void searchQueriesFromFile(File file){
 
         Scanner scanner = null;
 
-        // Open the file with the queries.
         try {
             scanner = new Scanner (file);
         } catch (FileNotFoundException e) {
@@ -75,26 +71,30 @@ public class Search {
             return;
         }
 
-        // Create the folder to store the results.
-        if (!createResultFolder()){
+        if (!resultFolderExists()){
             return;
         }
 
-        // Get the relevant documents of a query and store them in a file.
+        executeQueries(scanner);
+
+        LOGGER.log(Level.INFO, "Search finished.");
+    }
+
+    // Get the relevant documents of a query and store them in a file.
+    private void executeQueries(Scanner scanner) {
+
         for(int i = 1; scanner.hasNextLine(); ++i){
 
             String query = scanner.nextLine();
-            List<RelevantDocument> docs = getRelevantDocs(query);
+            List<RelevantDocument> docs = getRelevantDocsOfQuery(query);
             writeResultToFile(docs,i);
         }
-
-        LOGGER.log(Level.INFO, "Search finished.");
     }
 
     /*
      * Create the folder to store the results if it does not exists.
      */
-    private boolean createResultFolder() {
+    private boolean resultFolderExists() {
 
         File folder = new File(resultFolder);
 
@@ -132,7 +132,6 @@ public class Search {
             return;
         }
 
-        // Print the results in the file
         for(RelevantDocument doc : docs){
             writer.println(doc.getDocumentName());
         }

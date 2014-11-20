@@ -34,7 +34,8 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
     }
 
     /*
-     * Add a word in the inverse file.
+     * Add a word in the inverse file. If the word is not already in the inverse file
+     * then its frequency is 1, else is the frequency it had + 1
      */
     public void addWord(String word){
 
@@ -45,10 +46,6 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
 
             int frequency = 1;
 
-            /*
-             * If the word is not already in the inverse file
-             * then its frequency is 1, else is the frequency it had + 1
-             */
             if (map.containsKey(word)) {
                 frequency = 1 + map.get(word);
             }
@@ -80,7 +77,7 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
         if (stored) {
             for (Entry<String, Integer> elem : this) {
                 DBDriver.storeWord(elem.getKey());
-                DBDriver.storeInverseEntry(elem.getKey(), documentId, elem.getValue());
+                DBDriver.storeInverseTfEntry(elem.getKey(), documentId, elem.getValue());
             }
         }
     }
