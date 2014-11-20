@@ -29,7 +29,7 @@ public class Indexation {
     /*
      * Takes a folder and index the files inside it.
      */
-    public static void indexFiles(File stopWordsfile, File folder){
+    public static void startIndexation(File stopWordsfile, File folder){
 
         File[] listOfFiles = folder.listFiles();
 
@@ -41,18 +41,19 @@ public class Indexation {
         Arrays.sort(listOfFiles);
         Set<String> stopWordsSet = createStopWordsSet(stopWordsfile);
 
-        startIndexing(listOfFiles, stopWordsSet);
+        indexFiles(listOfFiles, stopWordsSet);
     }
 
-    private static void startIndexing(File[] listOfFiles,  Set<String> stopWordsSet) {
+    private static void indexFiles(File[] listOfFiles,  Set<String> stopWordsSet) {
 
         LOGGER.log(Level.INFO, "Index process started.");
 
-        int i = 0;
+        int documentId = 0;
 
         for (File file : listOfFiles) {
             LOGGER.log(Level.INFO, "Indexing file: " + file.getName());
-            createInverseFile(file, i++, stopWordsSet);
+            InverseFile invFile = indexFile(file, documentId++, stopWordsSet);
+            invFile.storeInDB();
         }
 
         LOGGER.log(Level.INFO, "Index finished.");
@@ -61,36 +62,42 @@ public class Indexation {
     /*
      * Create an inverse file of a document and store it in the database
      */
-    private static void createInverseFile(File file, int documentId,
+    private static InverseFile indexFile(File file, int documentId,
             Set<String> stopWordsSet) {
 
         LOGGER.log(Level.FINE, "Creating inverse file for document "
                 + file.getName());
 
-        Elements elems;
-
-        try {
-            elems = parse(file);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Could not parse file " + file.getName(),e);
-            return;
-        }
-
-        InverseFile invFile = new InverseFile(documentId, file.getName(), stopWordsSet);
-        addElems(elems, invFile);
-        invFile.storeInDB();
+        Elements elems = parse(file);
+        InverseFile invFile = new InverseFile(documentId, file.getName());
+        addElems(elems, invFile, stopWordsSet);
+        return invFile;
     }
 
     /*
      * Takes the text in the tags and adds them to the inverse file.
      */
-    private static void addElems(Elements elems, InverseFile invFile) {
+    private static void addElems(Elements elems, InverseFile invFile, 
+            Set<String> stopWordsSet) {
 
         for (Element e : elems) {
 
             String elemStr = e.ownText();
             String[] words = elemStr.split(SEPARATOR_REGEXP);
-            invFile.addWord(words);
+            addWordsToInv(words,invFile, stopWordsSet);
+        }
+    }
+
+    private static void addWordsToInv(String[] words, InverseFile invFile, 
+            Set<String> stopWordsSet) {
+
+        LOGGER.log(Level.FINEST, "Adding words to inverse file.");
+
+        for (String word : words) {
+            String treatedWord = Indexation.normalizeWord(word);
+            if (!word.isEmpty() && !stopWordsSet.contains(word)) {
+                invFile.addWord(treatedWord);
+            }
         }
     }
 
@@ -112,12 +119,17 @@ public class Indexation {
     /*
      * Parse an HTML document using JSoup
      */
-    private static Elements parse(File fileToParse) throws IOException {
+    private static Elements parse(File fileToParse) {
 
         LOGGER.log(Level.FINE, "Using JSoup to parse " + fileToParse.getName());
         Document doc;
 
-        doc = Jsoup.parse(fileToParse, "UTF-8", "");
+        try {
+            doc = Jsoup.parse(fileToParse, "UTF-8", "");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Could not parse file " + fileToParse.getName(),e);
+            return new Elements();
+        }
 
         // Select all the tags from the HTML file
         return doc.select("*");

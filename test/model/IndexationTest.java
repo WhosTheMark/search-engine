@@ -14,7 +14,7 @@ public class IndexationTest {
         File folder = new File("extra/CORPUS");
         File stopWordsfile = new File("extra/stopliste.txt");
 
-        Indexation.indexFiles(stopWordsfile, folder);
+        Indexation.startIndexation(stopWordsfile, folder);
     }
 
 }
