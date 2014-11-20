@@ -22,8 +22,8 @@ public class InnerProductCalculator implements RelevanceCalculator {
     }
 
     /*
-     * Calculates the relevance of documents using a list that accumulates the
-     * result and a list of the newly obtained frequencies.
+     * Calculates the relevance of documents with list of the newly
+     * obtained frequencies.
      */
     @Override
     public void calculateRelevance(List<RelevantDocument> relevDocs) {
@@ -34,7 +34,7 @@ public class InnerProductCalculator implements RelevanceCalculator {
         int i = 0;
         int j = 0;
 
-        //Merge the two lists ordered by the id of the document
+        // Merge the two lists ordered by the id of the document
         while (i < accumDocs.size() && j < relevDocs.size()) {
 
             RelevantDocument elem1 = accumDocs.get(i);
@@ -79,9 +79,14 @@ public class InnerProductCalculator implements RelevanceCalculator {
         }
     }
 
+    /*
+     * Finalize the calculations.
+     */
     @Override
     public List<RelevantDocument> finalizeCalcs() {
-        return accumDocs;
+        List<RelevantDocument> aux = accumDocs;
+        accumDocs = new ArrayList<RelevantDocument>();
+        return aux;
     }
 
 }

@@ -1,17 +1,20 @@
+package model;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 
-import controlleur.Indexation;
+import model.Indexation;
 
-public class Main {
+import org.junit.Test;
 
-    public static void main(String[] args) throws FileNotFoundException {
+public class IndexationTest {
+
+    @Test
+    public void test() {
 
         File folder = new File("extra/CORPUS");
         File stopWordsfile = new File("extra/stopliste.txt");
 
         Indexation.indexFiles(stopWordsfile, folder);
-
     }
 
 }

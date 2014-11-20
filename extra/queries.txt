@@ -1,0 +1,9 @@
+personnes, Intouchables
+lieu, naissance, Omar Sy
+personnes, récompensées, Intouchables
+palmarès, Globes de Cristal, 2012
+membre, jury, Globes de Cristal, 2012
+prix, Omar Sy, Globes de Crsital, 2012
+lieu, Globes de Cristal, 2012
+prix, Omar Sy
+acteurs, joué avec, Omar Sy

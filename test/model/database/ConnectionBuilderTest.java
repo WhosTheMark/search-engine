@@ -1,8 +1,10 @@
-package model;
+package model.database;
 
 import static org.junit.Assert.*;
 
 import java.sql.Connection;
+
+import model.database.ConnectionBuilder;
 
 import org.junit.Test;
 

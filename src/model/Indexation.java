@@ -1,17 +1,18 @@
-package controlleur;
+package model;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import model.DBDriver;
+import model.database.DBDriver;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,16 +22,20 @@ import org.jsoup.select.Elements;
 public class Indexation {
 
     private static final Logger LOGGER = Logger.getLogger(Indexation.class.getName());
-    private static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
+    public static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
     private static final int WORD_MAX_LENGTH = 7;
 
     // To avoid instantiation
     private Indexation() {
     }
 
+    /*
+     * Takes a folder and index the files inside it.
+     */
     public static void indexFiles(File stopWordsfile, File folder){
 
         File[] listOfFiles = folder.listFiles();
+        Arrays.sort(listOfFiles);
         Set<String> stopWordsSet = Indexation
                 .createStopWordsSet(stopWordsfile);
 
@@ -61,8 +66,8 @@ public class Indexation {
 
         try {
             elems = parse(file);
-        } catch (IOException e1) {
-            LOGGER.log(Level.SEVERE, "Could not parse file " + file.getName());
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Could not parse file " + file.getName(),e);
             return;
         }
 
@@ -94,12 +99,7 @@ public class Indexation {
             // If the word is not an empty string or an stop word we store it
             if (!word.isEmpty() && !stopWordsSet.contains(word)) {
 
-                String lowerCaseWord = word.toLowerCase();
-
-                // Truncate string if it is too long
-                if (lowerCaseWord.length() > WORD_MAX_LENGTH){
-                    lowerCaseWord = lowerCaseWord.substring(0,WORD_MAX_LENGTH);
-                }
+                String lowerCaseWord = treatKeyword(word);
 
                 int frequency = 1;
 
@@ -115,6 +115,21 @@ public class Indexation {
             }
         }
 
+    }
+
+    /*
+     * Modify a keyword to store it in the database.
+     */
+    public static String treatKeyword(String keyWord) {
+
+        String lowerCaseWord = keyWord.toLowerCase();
+
+        // Truncate string if it is too long
+        if (lowerCaseWord.length() > WORD_MAX_LENGTH){
+            lowerCaseWord = lowerCaseWord.substring(0,WORD_MAX_LENGTH);
+        }
+
+        return lowerCaseWord;
     }
 
     /*
@@ -138,7 +153,7 @@ public class Indexation {
 
         LOGGER.log(Level.FINE, "Building stop words set.");
         Scanner scanner;
-        Set<String> set = new TreeSet<String>();
+        Set<String> set = new HashSet<String>();
 
         try {
             scanner = new Scanner(file);

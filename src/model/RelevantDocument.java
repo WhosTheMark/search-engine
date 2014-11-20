@@ -1,5 +1,8 @@
 package model;
 
+/*
+ * Stores the data of a relevant document.
+ */
 public class RelevantDocument implements Comparable<RelevantDocument> {
 
     private int documentId;

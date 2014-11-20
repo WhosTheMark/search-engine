@@ -1,4 +1,4 @@
-package model;
+package model.database;
 
 import java.io.File;
 import java.sql.Connection;
@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import model.RelevantDocument;
 
 public class DBDriver {
 
