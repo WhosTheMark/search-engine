@@ -49,7 +49,7 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
         map.put(word, frequency);
 
     }
-    
+
     /*
      * Stores the inverse file in the database.
      */

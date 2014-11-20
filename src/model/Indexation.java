@@ -77,7 +77,7 @@ public class Indexation {
     /*
      * Takes the text in the tags and adds them to the inverse file.
      */
-    private static void addElems(Elements elems, InverseFile invFile, 
+    private static void addElems(Elements elems, InverseFile invFile,
             Set<String> stopWordsSet) {
 
         for (Element e : elems) {
@@ -88,14 +88,14 @@ public class Indexation {
         }
     }
 
-    private static void addWordsToInv(String[] words, InverseFile invFile, 
+    private static void addWordsToInv(String[] words, InverseFile invFile,
             Set<String> stopWordsSet) {
 
         LOGGER.log(Level.FINEST, "Adding words to inverse file.");
 
         for (String word : words) {
-            String treatedWord = Indexation.normalizeWord(word);
-            if (!word.isEmpty() && !stopWordsSet.contains(word)) {
+            String treatedWord = normalizeWord(word);
+            if (!treatedWord.isEmpty() && !stopWordsSet.contains(treatedWord)) {
                 invFile.addWord(treatedWord);
             }
         }
