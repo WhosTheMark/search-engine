@@ -37,7 +37,7 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
 
     @Override
     public int compareTo(RelevantDocument o) {
-        return weight - o.weight;
+        return o.weight - this.weight;
     }
 
     @Override
