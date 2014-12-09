@@ -14,7 +14,6 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
     private Map<String, Integer> map;
     private int documentId;
     private String documentName;
-    private int numberOfWords = 0;
     private static final Logger LOGGER = Logger.getLogger(InverseFile.class.getName());
 
     public InverseFile(int documentId, String documentName){
@@ -39,7 +38,6 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
 
         LOGGER.log(Level.FINEST, "Calculating frequency for word " + word);
 
-        ++numberOfWords;
         int frequency = 1;
 
         if (map.containsKey(word)) {

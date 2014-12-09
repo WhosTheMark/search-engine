@@ -15,10 +15,23 @@ public class DBDriver {
 
     private static final Logger LOGGER = Logger.getLogger(DBDriver.class.getName());
     private static final Connection CONNECTION = ConnectionBuilder.getConnection();
+
+    //Names of tables
     private static final String WORD_TABLE = "word";
     private static final String INDEX_TABLE = "indx";
     private static final String INDEX_TF_IDF_TABLE = "tf_idf_index";
     private static final String DOC_TABLE = "document";
+
+    //Queries
+    private static final String INSERT_DOC = "INSERT INTO " + DOC_TABLE + " VALUES (?,?);";
+    private static final String SELECT_NUMBER_OF_DOCS = "SELECT COUNT(*) " +
+                                                        "FROM " + DOC_TABLE + ";";
+    private static final String SELECT_WORD = "SELECT * " +
+                                              "FROM " + WORD_TABLE +
+                                              " WHERE id_word=?;";
+    private static final String INSERT_WORD = "INSERT INTO " + WORD_TABLE + " VALUES (?);";
+
+    private static final String DELETE_STMT = "DELETE FROM ?";
 
     // To avoid instantiation
     private DBDriver() {
@@ -33,8 +46,7 @@ public class DBDriver {
 
         try {
 
-            String strStmt = "INSERT INTO " + DOC_TABLE + " VALUES (?,?);";
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(strStmt);
+            PreparedStatement prepstmt = CONNECTION.prepareStatement(INSERT_DOC);
             prepstmt.setInt(1, idDocument);
             prepstmt.setString(2, documentName);
             prepstmt.executeUpdate();
@@ -51,10 +63,9 @@ public class DBDriver {
 
         LOGGER.log(Level.FINEST, "Getting the number of docs");
 
-        String strQuery = "SELECT COUNT(*) FROM " + DOC_TABLE + ";";
         ResultSet rs;
         try {
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(strQuery);
+            PreparedStatement prepstmt = CONNECTION.prepareStatement(SELECT_NUMBER_OF_DOCS);
             rs = prepstmt.executeQuery();
 
             if(!rs.next()){
@@ -77,8 +88,7 @@ public class DBDriver {
         LOGGER.log(Level.FINEST, "Checking if word " + word
                 + "exists in database.");
 
-        String strQuery = "SELECT * FROM " + WORD_TABLE + " WHERE id_word=?;";
-        PreparedStatement prepstmt = CONNECTION.prepareStatement(strQuery);
+        PreparedStatement prepstmt = CONNECTION.prepareStatement(SELECT_WORD);
         prepstmt.setString(1, word);
         ResultSet rs = prepstmt.executeQuery();
 
@@ -96,17 +106,15 @@ public class DBDriver {
 
             if (!wordExists(word)) {
 
-                String strStmt = "INSERT INTO " + WORD_TABLE + " VALUES (?);";
                 PreparedStatement prepstmt = CONNECTION
-                        .prepareStatement(strStmt);
+                        .prepareStatement(INSERT_WORD);
                 prepstmt.setString(1, word);
                 prepstmt.executeUpdate();
 
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Could not store a word in the database",
-                    e);
+            LOGGER.log(Level.SEVERE, "Could not store a word in the database", e);
         }
     }
 
@@ -217,10 +225,8 @@ public class DBDriver {
 
         LOGGER.log(Level.CONFIG, "Deleting info from databse.");
 
-        String strDelete = "DELETE FROM ?";
-
         try {
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(strDelete);
+            PreparedStatement prepstmt = CONNECTION.prepareStatement(DELETE_STMT);
             prepstmt.setString(1, INDEX_TABLE);
             prepstmt.executeUpdate();
             prepstmt.setString(1, WORD_TABLE);

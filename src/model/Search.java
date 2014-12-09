@@ -72,6 +72,8 @@ public class Search {
         }
 
         if (!resultFolderExists()){
+            if (scanner != null)
+                scanner.close();
             return;
         }
 
