@@ -14,53 +14,83 @@ import model.calculators.RelevanceCalculator;
 /*
  * Searches relevant documents in the database.
  */
-public class Search {
+public class Searcher {
 
-    private static final Logger LOGGER = Logger.getLogger(Search.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Searcher.class.getName());
     private String resultFolder;
 
     // Implements strategy pattern to use different calculators
     private RelevanceCalculator calculator;
 
 
-    public Search(RelevanceCalculator calculator, String resultFolder) {
+    public Searcher(RelevanceCalculator calculator, String resultFolder) {
         this.calculator = calculator;
         this.resultFolder = resultFolder;
     }
 
 
-    public List<RelevantDocument> getRelevantDocsOfQuery(String query) {
+    public List<RelevantDocument> executeQuery(String query) {
 
         LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
                 + query + ".");
 
         String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
-
-        for (String keyword : keywords) {
-            getRelevantDocsOfKeyword(keyword);
-        }
-
-        List<RelevantDocument> relvDocs = calculator.finalizeCalcs();
-        Collections.sort(relvDocs);
+        List<RelevantDocument> relvDocs = executeQuery(keywords);
 
         return relvDocs;
     }
 
 
-    private void getRelevantDocsOfKeyword(String keyword) {
+    public List<RelevantDocument> executeQuery(String[] keywords) {
+
+        LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
+                + keywords + ".");
+
+        for (int i = 0; i < keywords.length; ++i) {
+            List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);
+            calculator.addDocuments(relevantDocs);
+        }
+
+        return sortRelevantDocs();
+
+    }
+
+    public List<RelevantDocument> executeQuery(String[] keywords, int[] weights){
+
+        if(keywords.length != weights.length){
+            LOGGER.log(Level.SEVERE, "The length of the array of keywords and "
+                    + "the array of weigths do not match.");
+            return calculator.calculateRelevantDocs();
+        }
+
+        for (int i = 0; i < keywords.length; ++i) {
+            List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);
+            calculator.addDocuments(weights[i],relevantDocs);
+        }
+
+        return sortRelevantDocs();
+    }
+
+
+    private List<RelevantDocument> sortRelevantDocs() {
+        List<RelevantDocument> relvDocs = calculator.calculateRelevantDocs();
+        Collections.sort(relvDocs);
+        return relvDocs;
+    }
+
+
+    private List<RelevantDocument> getRelevantDocsOfKeyword(String keyword) {
 
         LOGGER.log(Level.FINER, "Calculating relevant documents for the keyword "
                 + keyword + ".");
 
         String normalizedKeyword = Indexation.normalizeWord(keyword);
 
-        List<RelevantDocument> relevantDocs =
-                RelevantDocument.getRelevantDocs(normalizedKeyword);
-        calculator.calculateRelevance(relevantDocs);
+        return RelevantDocument.getRelevantDocs(normalizedKeyword);
     }
 
 
-    public void searchQueriesFromFile(File file){
+    public void executeQueriesFromFile(File file){
 
         Scanner scanner = null;
 
@@ -88,30 +118,9 @@ public class Search {
         for(int i = 1; scanner.hasNextLine(); ++i){
 
             String query = scanner.nextLine();
-            List<RelevantDocument> docs = getRelevantDocsOfQuery(query);
+            List<RelevantDocument> docs = executeQuery(query);
             writeResultToFile(docs,i);
         }
-    }
-
-    /*
-     * Create the folder to store the results if it does not exists.
-     */
-    private boolean resultFolderExists() {
-
-        File folder = new File(resultFolder);
-
-        if (!folder.exists()) {
-            LOGGER.log(Level.CONFIG, "Creating results foder.");
-            folder.mkdir();
-        }
-
-        if (!folder.exists()) {
-            LOGGER.log(Level.SEVERE, "Could not create folder "
-                    + folder.getPath() + " to store results.");
-            return false;
-        }
-
-        return true;
     }
 
     /*
@@ -141,4 +150,24 @@ public class Search {
         writer.close();
     }
 
+    /*
+     * Create the folder to store the results if it does not exists.
+     */
+    private boolean resultFolderExists() {
+
+        File folder = new File(resultFolder);
+
+        if (!folder.exists()) {
+            LOGGER.log(Level.CONFIG, "Creating results foder.");
+            folder.mkdir();
+        }
+
+        if (!folder.exists()) {
+            LOGGER.log(Level.SEVERE, "Could not create folder "
+                    + folder.getPath() + " to store results.");
+            return false;
+        }
+
+        return true;
+    }
 }

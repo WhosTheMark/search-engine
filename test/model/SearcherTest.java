@@ -2,20 +2,20 @@ package model;
 
 import java.io.File;
 
-import model.Search;
+import model.Searcher;
 import model.calculators.InnerProductCalculator;
 
 import org.junit.Test;
 
-public class SearchTest {
+public class SearcherTest {
 
 
     @Test
     public void testFile(){
 
         File file = new File("extra/queries.txt");
-        Search search = new Search(new InnerProductCalculator(), "extra/results");
-        search.searchQueriesFromFile(file);
+        Searcher search = new Searcher(new InnerProductCalculator(), "extra/results");
+        search.executeQueriesFromFile(file);
 
     }
 

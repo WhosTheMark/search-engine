@@ -10,7 +10,7 @@ import model.RelevantDocument;
 /*
  * Calculates relevant documents by using inner product.
  */
-public class InnerProductCalculator implements RelevanceCalculator {
+public class InnerProductCalculator extends RelevanceCalculator {
 
     private static final Logger LOGGER = Logger.getLogger(
             InnerProductCalculator.class.getName());
@@ -21,12 +21,16 @@ public class InnerProductCalculator implements RelevanceCalculator {
         accumDocs = new ArrayList<RelevantDocument>();
     }
 
+    @Override
+    public void addDocuments(List<RelevantDocument> relevDocs) {
+        addDocuments(RelevanceCalculator.DEFAULT_WEIGHT, relevDocs);
+    }
     /*
      * Calculates the relevance of documents with list of the newly
      * obtained frequencies.
      */
     @Override
-    public void calculateRelevance(List<RelevantDocument> relevDocs) {
+    public void addDocuments(int weight, List<RelevantDocument> relevDocs) {
 
         LOGGER.log(Level.FINER, "Calculating relevance using inner product.");
 
@@ -45,19 +49,20 @@ public class InnerProductCalculator implements RelevanceCalculator {
                 ++i;
 
             } else if (elem1.getDocumentId() > elem2.getDocumentId()) {
+                elem2.setWeight(weight * elem2.getWeight());
                 result.add(elem2);
                 ++j;
 
             } else {
-                elem1.setWeight(elem1.getWeight() + elem2.getWeight());
+                elem1.setWeight(elem1.getWeight() +  weight * elem2.getWeight());
                 result.add(elem1);
                 ++i;
                 ++j;
             }
         }
 
-        addLastElems(i,accumDocs,result);
-        addLastElems(j,relevDocs,result);
+        addLastElems(RelevanceCalculator.DEFAULT_WEIGHT,weight,accumDocs,result);
+        addLastElems(j,weight,relevDocs,result);
 
         accumDocs = result;
 
@@ -66,15 +71,16 @@ public class InnerProductCalculator implements RelevanceCalculator {
     /*
      * Add the elements of the list that have not been added.
      */
-    private void addLastElems(int i, List<RelevantDocument> list, 
+    private void addLastElems(int index, int weight, List<RelevantDocument> list,
             List<RelevantDocument> result){
 
-        LOGGER.log(Level.FINEST, 
+        LOGGER.log(Level.FINEST,
                 "Adding the last elements on the list starting at index: "
-                + i);
+                + index);
 
-        for (; i < list.size(); ++i) {
-            RelevantDocument elem = list.get(i);
+        for (; index < list.size(); ++index) {
+            RelevantDocument elem = list.get(index);
+            elem.setWeight(weight * elem.getWeight());
             result.add(elem);
         }
     }
@@ -83,7 +89,7 @@ public class InnerProductCalculator implements RelevanceCalculator {
      * Finalize the calculations.
      */
     @Override
-    public List<RelevantDocument> finalizeCalcs() {
+    public List<RelevantDocument> calculateRelevantDocs() {
         List<RelevantDocument> aux = accumDocs;
         accumDocs = new ArrayList<RelevantDocument>();
         return aux;
