@@ -3,6 +3,7 @@ package model;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -31,9 +32,6 @@ public class Searcher {
 
     public List<RelevantDocument> executeQuery(String query) {
 
-        LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
-                + query + ".");
-
         String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
         return executeQuery(keywords);
     }
@@ -42,7 +40,7 @@ public class Searcher {
     public List<RelevantDocument> executeQuery(String[] keywords) {
 
         LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
-                + keywords.toString() + ".");
+                + Arrays.toString(keywords) + ".");
 
         for (int i = 0; i < keywords.length; ++i) {
             List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);

@@ -61,7 +61,7 @@ public class InnerProductCalculator extends RelevanceCalculator {
             }
         }
 
-        addLastElems(RelevanceCalculator.DEFAULT_WEIGHT,weight,accumDocs,result);
+        addLastElems(i,RelevanceCalculator.DEFAULT_WEIGHT,accumDocs,result);
         addLastElems(j,weight,relevDocs,result);
 
         accumDocs = result;
