@@ -35,16 +35,14 @@ public class Searcher {
                 + query + ".");
 
         String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
-        List<RelevantDocument> relvDocs = executeQuery(keywords);
-
-        return relvDocs;
+        return executeQuery(keywords);
     }
 
 
     public List<RelevantDocument> executeQuery(String[] keywords) {
 
         LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
-                + keywords + ".");
+                + keywords.toString() + ".");
 
         for (int i = 0; i < keywords.length; ++i) {
             List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);
@@ -102,8 +100,9 @@ public class Searcher {
         }
 
         if (!resultFolderExists()){
-            if (scanner != null)
+            if (scanner != null) {
                 scanner.close();
+            }
             return;
         }
 

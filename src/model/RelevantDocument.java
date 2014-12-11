@@ -39,10 +39,11 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
     public int compareTo(RelevantDocument o) {
         float subs = o.weight - this.weight;
 
-        if (subs > 0)
+        if (subs > 0) {
             return 1;
-        else if (subs < 0)
+        } else if (subs < 0) {
             return -1;
+        }
 
         return 0;
     }

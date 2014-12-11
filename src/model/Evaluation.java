@@ -90,9 +90,12 @@ public class Evaluation {
             List<Evaluation> list) {
 
         int total = list.size();
-        evaluation.precision5 = evaluation.precision5 / (float)total;
-        evaluation.precision10 = evaluation.precision10 / (float)total;
-        evaluation.precision25 = evaluation.precision25 / (float)total;
+
+        if(total != 0) {
+            evaluation.precision5 = evaluation.precision5 / (float)total;
+            evaluation.precision10 = evaluation.precision10 / (float)total;
+            evaluation.precision25 = evaluation.precision25 / (float)total;
+        }
     }
 
     public String toString(){

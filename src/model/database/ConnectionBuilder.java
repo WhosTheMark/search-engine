@@ -25,12 +25,7 @@ public class ConnectionBuilder {
 
         LOGGER.log(Level.CONFIG, "Configuring the connection to the database.");
 
-        try {
-            Class.forName(DB_DRIVER);
-
-        } catch (ClassNotFoundException e) {
-
-            LOGGER.log(Level.SEVERE, "JDBC driver is not installed.", e);
+        if (!jdbcDriverExist()){
             return null;
         }
 
@@ -46,6 +41,21 @@ public class ConnectionBuilder {
         }
 
         return conexion;
+    }
+
+    private static boolean jdbcDriverExist() {
+
+        try {
+
+            Class.forName(DB_DRIVER);
+
+        } catch (ClassNotFoundException e) {
+
+            LOGGER.log(Level.SEVERE, "JDBC driver is not installed.", e);
+            return false;
+        }
+
+        return true;
     }
 
 }

@@ -158,8 +158,7 @@ public class DBDriver {
 
         LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
 
-        List<RelevantDocument> list = getRelevantDocs(word,INDEX_TABLE);
-        return list;
+        return getRelevantDocs(word,INDEX_TABLE);
     }
 
     /*
@@ -169,8 +168,7 @@ public class DBDriver {
 
         LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
 
-        List<RelevantDocument> list = getRelevantDocs(word,INDEX_TF_IDF_TABLE);
-        return list;
+        return getRelevantDocs(word,INDEX_TF_IDF_TABLE);
     }
 
     private static List<RelevantDocument> getRelevantDocs(String word, String table) {
