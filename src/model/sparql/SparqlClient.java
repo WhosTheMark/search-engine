@@ -1,13 +1,11 @@
-package model;
+package model.sparql;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,30 +31,32 @@ import org.xml.sax.SAXException;
 public class SparqlClient {
 
     private static final Logger LOGGER = Logger.getLogger(SparqlClient.class.getName());
-    /**
-     * URI of the remote SPARQL server
-     */
-    private String endpointUri = null;
+    private String endpointUri;
+    private final String ASK_QUERY = "ASK WHERE { ?s ?p ?o }";
 
     public SparqlClient(String endpointUri) {
         this.endpointUri = endpointUri;
+    }
+
+    public boolean isServerUp(){
+        return ask(ASK_QUERY);
     }
 
     /**
      * run a SPARQL query (select) on the remote server
      * @param queryString
      */
-    public Iterable<Map<String, String>> select(String queryString) {
+    public SparqlResult select(String queryString) {
+
         Document document = getXMLFromServer(queryString);
         NodeList resultNodes = document.getElementsByTagName("result");
-
         return getResults(resultNodes);
-
     }
 
-    private List<Map<String, String>> getResults(NodeList resultNodes) {
 
-        List<Map<String, String>> results = new ArrayList<Map<String, String>>();
+    private SparqlResult getResults(NodeList resultNodes) {
+
+        SparqlResult results = new SparqlResult();
 
         for (int i = 0; i < resultNodes.getLength(); ++i) {
 
@@ -67,40 +67,45 @@ public class SparqlClient {
         return results;
     }
 
-    private void getBindings(Node resultNode, List<Map<String, String>> results) {
+    private void getBindings(Node resultNode, SparqlResult results) {
 
-        Map<String, String> result = new HashMap<String, String>();
+        results.addRow();
         NodeList bindingNodes = resultNode.getChildNodes();
 
         for (int i = 0; i < bindingNodes.getLength(); ++i) {
 
             Node bindingNode = bindingNodes.item(i);
-
-            // To avoid text nodes
-            if (bindingNode.getNodeType() == Node.ELEMENT_NODE) {
-
-                NamedNodeMap attrMap = bindingNode.getAttributes();
-                Node attrName = attrMap.getNamedItem("name");
-                String varName = attrName.getTextContent();
-                String value = getValue(bindingNode);
-
-                result.put(varName, value);
-            }
+            bindValue(results, bindingNode);
         }
+    }
 
-        results.add(result);
+    private void bindValue(SparqlResult results, Node bindingNode) {
+
+        // To avoid text nodes
+        if (notTextNode(bindingNode)) {
+
+            NamedNodeMap attrMap = bindingNode.getAttributes();
+            Node attrName = attrMap.getNamedItem("name");
+            String varName = attrName.getTextContent();
+            String value = getValue(bindingNode);
+            results.addResult(varName, value);
+        }
+    }
+
+    private boolean notTextNode(Node bindingNode) {
+        return bindingNode.getNodeType() == Node.ELEMENT_NODE;
     }
 
     private String getValue(Node bindingNode) {
 
         NodeList bindingChildren = bindingNode.getChildNodes();
 
-        for (int k = 0; k < bindingChildren.getLength(); ++k) {
+        for (int i = 0; i < bindingChildren.getLength(); ++i) {
 
-            Node bindingChild = bindingChildren.item(k);
+            Node bindingChild = bindingChildren.item(i);
 
             // To avoid text nodes
-            if (bindingChild.getNodeType() == Node.ELEMENT_NODE) {
+            if (notTextNode(bindingChild)) {
                 return bindingChild.getTextContent();
             }
         }
@@ -119,7 +124,6 @@ public class SparqlClient {
         Node xmlNode = list.item(0);
 
         return xmlNode != null && xmlNode.getTextContent().equals("true");
-
     }
 
     /*
@@ -194,7 +198,7 @@ public class SparqlClient {
         List<NameValuePair> pairList = new ArrayList<NameValuePair>();
         pairList.add(new BasicNameValuePair("update", queryString));
 
-        // Adds update to the post request
+        // Adds update pair to the post request
         httpPost.setEntity(new UrlEncodedFormEntity(pairList));
         return httpPost;
     }
