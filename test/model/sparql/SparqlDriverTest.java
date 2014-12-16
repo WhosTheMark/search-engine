@@ -74,7 +74,7 @@ public class SparqlDriverTest {
     @Test
     public void testGetURIs() {
 
-        SparqlDriver sparqlClientData = new SparqlDriver(SERVER_ADDRESS);
+        SparqlAccessor sparqlClientData = new SparqlAccessor(SERVER_ADDRESS);
         List<String> list = sparqlClientData.getURIs("lieu");
 
         for (String uri: list){

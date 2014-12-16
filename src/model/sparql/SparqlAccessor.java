@@ -3,19 +3,21 @@ package model.sparql;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SparqlDriver {
-    /**
-     * URI of the remote SPARQL server
-     */
+public class SparqlAccessor {
+
+    // Connection to the server.
     private SparqlClient client;
     private static final String PREFIXES =
               "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             + "prefix : <http://www.irit.fr/recherches/MELODI/ontologies/FilmographieV1.owl#>";
 
-    public SparqlDriver(String endpointUri) {
+    public SparqlAccessor(String endpointUri) {
         this.client = new SparqlClient(endpointUri);
     }
 
+    /*
+     * Get the URI associated to the String.
+     */
     public List<String> getURIs(String label) {
 
         List<String> list = new ArrayList<String>();
@@ -32,6 +34,9 @@ public class SparqlDriver {
         return list;
     }
 
+    /*
+     * Get all the labels of an URI.
+     */
     public List<String> getAllLabels(String uri){
 
         List<String> list = new ArrayList<String>();

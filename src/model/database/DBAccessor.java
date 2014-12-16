@@ -11,9 +11,9 @@ import java.util.logging.Logger;
 
 import model.RelevantDocument;
 
-public class DBDriver {
+public class DBAccessor {
 
-    private static final Logger LOGGER = Logger.getLogger(DBDriver.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DBAccessor.class.getName());
     private static final Connection CONNECTION = ConnectionBuilder.getConnection();
 
     //Names of tables
@@ -34,7 +34,7 @@ public class DBDriver {
     private static final String DELETE_STMT = "DELETE FROM ?";
 
     // To avoid instantiation
-    private DBDriver() {
+    private DBAccessor() {
     }
 
     /*

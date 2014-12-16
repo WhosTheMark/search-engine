@@ -28,10 +28,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/*
+ * Class to establish the connection to the fuseki server.
+ * To better understand the format of the responses, you
+ * can check the documentation here:
+ * http://www.w3.org/TR/2013/REC-rdf-sparql-XMLres-20130321/
+ */
 public class SparqlClient {
 
     private static final Logger LOGGER = Logger.getLogger(SparqlClient.class.getName());
+
+    // Address of the server
     private String endpointUri;
+
+    // Default query to know if server is up
     private final String ASK_QUERY = "ASK WHERE { ?s ?p ?o }";
 
     public SparqlClient(String endpointUri) {
@@ -42,9 +52,8 @@ public class SparqlClient {
         return ask(ASK_QUERY);
     }
 
-    /**
-     * run a SPARQL query (select) on the remote server
-     * @param queryString
+    /*
+     * Run a SPARQL select on the server
      */
     public SparqlResult select(String queryString) {
 
@@ -54,6 +63,10 @@ public class SparqlClient {
     }
 
 
+    /*
+     * Store the information of the XML result nodes in a SPARQL 
+     * result structure.
+     */
     private SparqlResult getResults(NodeList resultNodes) {
 
         SparqlResult results = new SparqlResult();
@@ -67,6 +80,9 @@ public class SparqlClient {
         return results;
     }
 
+    /*
+     * Take a Result node and bind the values.
+     */
     private void getBindings(Node resultNode, SparqlResult results) {
 
         results.addRow();
@@ -79,6 +95,9 @@ public class SparqlClient {
         }
     }
 
+    /*
+     * Bind a single value.
+     */
     private void bindValue(SparqlResult results, Node bindingNode) {
 
         // To avoid text nodes
@@ -92,10 +111,9 @@ public class SparqlClient {
         }
     }
 
-    private boolean notTextNode(Node bindingNode) {
-        return bindingNode.getNodeType() == Node.ELEMENT_NODE;
-    }
-
+    /*
+     * Get the value from the XML node.
+     */
     private String getValue(Node bindingNode) {
 
         NodeList bindingChildren = bindingNode.getChildNodes();
@@ -113,9 +131,17 @@ public class SparqlClient {
         return "";
     }
 
-    /**
-     * run a SPARQL query (ask) on the remote server
-     * @param queryString
+    /*
+     * To check if a node is not a Text Node.
+     * The parser takes into account the spaces outside the tags,
+     * we can avoid them using this.
+     */
+    private boolean notTextNode(Node bindingNode) {
+        return bindingNode.getNodeType() == Node.ELEMENT_NODE;
+    }
+
+    /*
+     * Run a SPARQL ask on the remote server
      */
     public boolean ask(String queryString) {
 
@@ -153,6 +179,9 @@ public class SparqlClient {
         return null;
     }
 
+    /*
+     * Builds the URI to send queries to the server.
+     */
     private URI buildHTTPRequest(String queryString) throws URISyntaxException {
 
         URIBuilder builder = new URIBuilder();
@@ -165,9 +194,8 @@ public class SparqlClient {
         return uri;
     }
 
-    /**
-     * run a SPARQL update on the remote server
-     * @param queryString
+    /*
+     * Run a SPARQL update on the remote server.
      */
     public void update(String queryString) {
         try {
@@ -189,6 +217,9 @@ public class SparqlClient {
         }
     }
 
+    /*
+     * Builds post request to send updates to the server.
+     */
     private HttpPost buildPostRequest(String queryString)
             throws UnsupportedEncodingException {
 

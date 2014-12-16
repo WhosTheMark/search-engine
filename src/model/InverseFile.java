@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import model.database.DBDriver;
+import model.database.DBAccessor;
 
 public class InverseFile implements Iterable<Entry<String, Integer>> {
 
@@ -53,12 +53,12 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
      */
     public void storeInDB(){
 
-        boolean stored = DBDriver.storeDocument(this.documentId, this.documentName);
+        boolean stored = DBAccessor.storeDocument(this.documentId, this.documentName);
 
         if (stored) {
             for (Entry<String, Integer> elem : this) {
-                DBDriver.storeWord(elem.getKey());
-                DBDriver.storeInverseTfEntry(elem.getKey(), documentId, elem.getValue());
+                DBAccessor.storeWord(elem.getKey());
+                DBAccessor.storeInverseTfEntry(elem.getKey(), documentId, elem.getValue());
             }
         }
     }

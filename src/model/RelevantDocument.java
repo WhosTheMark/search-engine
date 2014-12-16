@@ -2,7 +2,7 @@ package model;
 
 import java.util.List;
 
-import model.database.DBDriver;
+import model.database.DBAccessor;
 
 /*
  * Stores the data of a relevant document.
@@ -70,12 +70,12 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
      */
     public static List<RelevantDocument> getRelevantDocs(String keyword){
 
-        List<RelevantDocument> listTfIdf = DBDriver.getRelevantDocsTfIdf(keyword);
+        List<RelevantDocument> listTfIdf = DBAccessor.getRelevantDocsTfIdf(keyword);
 
         // If there is no data of tf-idf in the database, we calculate it.
         if (listTfIdf.isEmpty()) {
-            List<RelevantDocument> listTf = DBDriver.getRelevantDocsTf(keyword);
-            int numDocs = DBDriver.getNumberOfDocuments();
+            List<RelevantDocument> listTf = DBAccessor.getRelevantDocsTf(keyword);
+            int numDocs = DBAccessor.getNumberOfDocuments();
             listTfIdf = calculateTfIdf(keyword,listTf,numDocs);
         }
 
@@ -102,7 +102,7 @@ public class RelevantDocument implements Comparable<RelevantDocument> {
     private static void storeTfIdf(String keyword, List<RelevantDocument> list) {
 
         for(RelevantDocument doc : list){
-            DBDriver.storeInverseTfIdfEntry(keyword,doc.documentId,doc.weight);
+            DBAccessor.storeInverseTfIdfEntry(keyword,doc.documentId,doc.weight);
         }
     }
 
