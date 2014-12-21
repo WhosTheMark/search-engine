@@ -64,7 +64,7 @@ public class SparqlClient {
 
 
     /*
-     * Store the information of the XML result nodes in a SPARQL 
+     * Store the information of the XML result nodes in a SPARQL
      * result structure.
      */
     private SparqlResult getResults(NodeList resultNodes) {

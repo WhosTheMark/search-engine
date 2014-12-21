@@ -8,7 +8,7 @@ import java.util.Map;
 public class SparqlResult {
 
     private List<Map<String,String>> results;
-    private int currentRow = 0;
+    private int currentRow = -1;
 
     public SparqlResult(){
         results = new ArrayList<Map<String, String>>();
@@ -33,7 +33,7 @@ public class SparqlResult {
     }
 
     public boolean hasNextRow(){
-        return currentRow < results.size();
+        return currentRow + 1 < results.size();
     }
 
     public void nextRow(){
@@ -42,7 +42,7 @@ public class SparqlResult {
 
     public String getValue(String key){
 
-        if (!this.hasNextRow()){
+        if (currentRow >= results.size()){
             return null;
         }
 

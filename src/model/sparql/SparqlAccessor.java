@@ -11,37 +11,20 @@ public class SparqlAccessor {
               "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             + "prefix : <http://www.irit.fr/recherches/MELODI/ontologies/FilmographieV1.owl#>";
 
-    public SparqlAccessor(String endpointUri) {
-        this.client = new SparqlClient(endpointUri);
+    private static final String SERVER_ADDRESS = "localhost:3030/ds";
+
+    public SparqlAccessor() {
+        this.client = new SparqlClient(SERVER_ADDRESS);
     }
 
-    /*
-     * Get the URI associated to the String.
-     */
-    public List<String> getURIs(String label) {
+    public List<String> getOtherLabels(String label){
 
         List<String> list = new ArrayList<String>();
 
-        String query = PREFIXES + " SELECT * WHERE { ?res rdfs:label \"" + label + "\" @fr. }";
-        SparqlResult results = client.select(query);
-
-        while (results.hasNextRow()){
-            results.nextRow();
-            String value = results.getValue("res");
-            list.add(value);
-        }
-
-        return list;
-    }
-
-    /*
-     * Get all the labels of an URI.
-     */
-    public List<String> getAllLabels(String uri){
-
-        List<String> list = new ArrayList<String>();
-
-        String query = PREFIXES + " SELECT * WHERE { <" + uri + "> rdfs:label ?label }";
+        String query = PREFIXES + "SELECT ?label WHERE { ?res rdfs:label \"" + label + "\" @fr."
+                                + "?res rdfs:label ?label."
+                                + "FILTER (?label != \"" + label + "\" @fr)."
+                                + "FILTER langMatches(lang(?label), \"FR\" ). }";
         SparqlResult results = client.select(query);
 
         while (results.hasNextRow()){
@@ -52,4 +35,5 @@ public class SparqlAccessor {
 
         return list;
     }
+
 }

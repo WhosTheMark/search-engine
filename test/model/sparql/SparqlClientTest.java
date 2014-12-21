@@ -1,10 +1,6 @@
 package model.sparql;
 
-import java.util.List;
-
-import org.junit.Test;
-
-public class SparqlDriverTest {
+public class SparqlClientTest {
 
     private static final String PREFIXES =
               "PREFIX : <http://www.lamaisondumeurtre.fr#>\n"
@@ -71,20 +67,5 @@ public class SparqlDriverTest {
             }
     }
 
-    @Test
-    public void testGetURIs() {
-
-        SparqlAccessor sparqlClientData = new SparqlAccessor(SERVER_ADDRESS);
-        List<String> list = sparqlClientData.getURIs("lieu");
-
-        for (String uri: list){
-            System.out.println(uri);
-            List<String> labels = sparqlClientData.getAllLabels(uri);
-            for(String label : labels) {
-                System.out.println("labels: " + label);
-            }
-        }
-
-    }
 
 }

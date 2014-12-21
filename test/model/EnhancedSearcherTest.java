@@ -2,22 +2,22 @@ package model;
 
 import java.io.File;
 
-import model.Searcher;
 import model.calculators.InnerProductCalculator;
+import model.calculators.RelevanceCalculator;
 
 import org.junit.Test;
 
-public class SearcherTest {
-
+public class EnhancedSearcherTest {
 
     final String QUERY_FILE = "extra/queries.txt";
     final String RESULT_FOLDER = "extra/results";
 
     @Test
-    public void testFile(){
+    public void test() {
 
         File file = new File(QUERY_FILE);
-        Searcher searcher = new Searcher(new InnerProductCalculator(), RESULT_FOLDER);
+        RelevanceCalculator calc = new InnerProductCalculator();
+        EnhancedSearcher searcher = new EnhancedSearcher(calc,RESULT_FOLDER);
         searcher.executeQueriesFromFile(file);
     }
 

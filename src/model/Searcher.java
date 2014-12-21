@@ -21,7 +21,7 @@ public class Searcher {
     private String resultFolder;
 
     // Implements strategy pattern to use different calculators
-    private RelevanceCalculator calculator;
+    protected RelevanceCalculator calculator;
 
 
     public Searcher(RelevanceCalculator calculator, String resultFolder) {
@@ -51,31 +51,14 @@ public class Searcher {
 
     }
 
-    public List<RelevantDocument> executeQuery(String[] keywords, int[] weights){
-
-        if(keywords.length != weights.length){
-            LOGGER.log(Level.SEVERE, "The length of the array of keywords and "
-                    + "the array of weigths do not match.");
-            return calculator.calculateRelevantDocs();
-        }
-
-        for (int i = 0; i < keywords.length; ++i) {
-            List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);
-            calculator.addDocuments(weights[i],relevantDocs);
-        }
-
-        return sortRelevantDocs();
-    }
-
-
-    private List<RelevantDocument> sortRelevantDocs() {
+    protected List<RelevantDocument> sortRelevantDocs() {
         List<RelevantDocument> relvDocs = calculator.calculateRelevantDocs();
         Collections.sort(relvDocs);
         return relvDocs;
     }
 
 
-    private List<RelevantDocument> getRelevantDocsOfKeyword(String keyword) {
+    protected List<RelevantDocument> getRelevantDocsOfKeyword(String keyword) {
 
         LOGGER.log(Level.FINER, "Calculating relevant documents for the keyword "
                 + keyword + ".");
