@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +18,7 @@ import org.jsoup.select.Elements;
 
 public class Indexation {
 
-    private static final Logger LOGGER = Logger.getLogger(Indexation.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
     private static final int WORD_MAX_LENGTH = 7;
 
@@ -31,10 +31,12 @@ public class Indexation {
      */
     public static void startIndexation(File stopWordsfile, File folder){
 
+        LOGGER.entry(stopWordsfile,folder);
+
         File[] listOfFiles = folder.listFiles();
 
         if(listOfFiles == null) {
-            LOGGER.log(Level.SEVERE, "Folder " + folder.getName() + "does not exists.");
+            LOGGER.error("Folder {} does not exists.", folder.getName());
             return;
         }
 
@@ -42,21 +44,24 @@ public class Indexation {
         Set<String> stopWordsSet = createStopWordsSet(stopWordsfile);
 
         indexFiles(listOfFiles, stopWordsSet);
+
+        LOGGER.exit();
     }
 
     private static void indexFiles(File[] listOfFiles,  Set<String> stopWordsSet) {
 
-        LOGGER.log(Level.INFO, "Index process started.");
+        LOGGER.entry(listOfFiles, stopWordsSet);
+        LOGGER.info("Index process started.");
 
         int documentId = 0;
 
         for (File file : listOfFiles) {
-            LOGGER.log(Level.INFO, "Indexing file: " + file.getName());
+            LOGGER.info("Indexing file: {}.", file.getName());
             InverseFile invFile = indexFile(file, documentId++, stopWordsSet);
             invFile.storeInDB();
         }
 
-        LOGGER.log(Level.INFO, "Index finished.");
+        LOGGER.info("Index finished.");
     }
 
     /*
@@ -65,12 +70,14 @@ public class Indexation {
     private static InverseFile indexFile(File file, int documentId,
             Set<String> stopWordsSet) {
 
-        LOGGER.log(Level.FINE, "Creating inverse file for document "
-                + file.getName());
+        LOGGER.entry(file, documentId, stopWordsSet);
+        LOGGER.debug("Creating inverse file for document {}.", file.getName());
 
         Elements elems = parse(file);
         InverseFile invFile = new InverseFile(documentId, file.getName());
         addElems(elems, invFile, stopWordsSet);
+
+        LOGGER.exit(invFile);
         return invFile;
     }
 
@@ -80,18 +87,22 @@ public class Indexation {
     private static void addElems(Elements elems, InverseFile invFile,
             Set<String> stopWordsSet) {
 
+        LOGGER.entry(elems, invFile, stopWordsSet);
+
         for (Element e : elems) {
 
             String elemStr = e.ownText();
             String[] words = elemStr.split(SEPARATOR_REGEXP);
             addWordsToInv(words,invFile, stopWordsSet);
         }
+
+        LOGGER.exit();
     }
 
     private static void addWordsToInv(String[] words, InverseFile invFile,
             Set<String> stopWordsSet) {
 
-        LOGGER.log(Level.FINEST, "Adding words to inverse file.");
+        LOGGER.entry(words,invFile,stopWordsSet);
 
         for (String word : words) {
             String treatedWord = normalizeWord(word);
@@ -99,21 +110,25 @@ public class Indexation {
                 invFile.addWord(treatedWord);
             }
         }
+
+        LOGGER.exit();
     }
 
     /*
      * Modify a keyword to store it in the database.
      */
-    public static String normalizeWord(String keyWord) {
+    public static String normalizeWord(String keyword) {
 
-        String lowerCaseWord = keyWord.toLowerCase();
+        LOGGER.entry(keyword);
+
+        String lowerCaseWord = keyword.toLowerCase();
 
         // Truncate string if it is too long
         if (lowerCaseWord.length() > WORD_MAX_LENGTH){
             lowerCaseWord = lowerCaseWord.substring(0,WORD_MAX_LENGTH);
         }
 
-        return lowerCaseWord;
+        return LOGGER.exit(lowerCaseWord);
     }
 
     /*
@@ -121,13 +136,13 @@ public class Indexation {
      */
     private static Elements parse(File fileToParse) {
 
-        LOGGER.log(Level.FINE, "Using JSoup to parse " + fileToParse.getName());
+        LOGGER.debug("Using JSoup to parse {}.", fileToParse.getName());
         Document doc;
 
         try {
             doc = Jsoup.parse(fileToParse, "UTF-8", "");
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Could not parse file " + fileToParse.getName(),e);
+            LOGGER.error("Could not parse file " + fileToParse.getName() + ".",e);
             return new Elements();
         }
 
@@ -140,7 +155,7 @@ public class Indexation {
      */
     private static Set<String> createStopWordsSet(File file) {
 
-        LOGGER.log(Level.FINE, "Building stop words set.");
+        LOGGER.debug("Building stop words set using file {}.", file.getName());
         Scanner scanner;
         Set<String> set = new HashSet<String>();
 
@@ -148,22 +163,27 @@ public class Indexation {
             scanner = new Scanner(file);
 
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Could not find stop list file", e);
+            LOGGER.error("Could not find stop list file.", e);
             return set;
         }
 
         scanner.useDelimiter(SEPARATOR_REGEXP);
         addWordsToSet(scanner, set);
 
+        LOGGER.exit(set);
         return set;
     }
 
     private static void addWordsToSet(Scanner scanner, Set<String> set) {
+
+        LOGGER.entry(scanner,set);
 
         while (scanner.hasNext()) {
             String word = scanner.next();
             String normalizedWord = normalizeWord(word);
             set.add(normalizedWord);
         }
+
+        LOGGER.exit();
     }
 }

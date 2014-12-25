@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Evaluator {
 
-    private static final Logger LOGGER = Logger.getLogger(Evaluator.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String DOC_NAME = "D[0-9]+\\.html";
     private static final int MAX_PRECISION = 25;
 
@@ -39,6 +40,8 @@ public class Evaluator {
      */
     public void evaluate(File qrelsFolder, File resultFolder){
 
+        LOGGER.entry(qrelsFolder, resultFolder);
+
         File[] qrelFiles;
         File[] resultFiles;
 
@@ -46,7 +49,7 @@ public class Evaluator {
             qrelFiles = listFiles(qrelsFolder);
             resultFiles = listFiles(resultFolder);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Some of the folders to compare do not exist", e);
+            LOGGER.error("Some of the folders to compare do not exist", e);
             return;
         }
 
@@ -55,6 +58,8 @@ public class Evaluator {
 
         compareResults(qrelFiles, resultFiles);
 
+        LOGGER.exit();
+
     }
 
     /*
@@ -62,11 +67,13 @@ public class Evaluator {
      */
     private void compareResults(File[] qrelFiles, File[] resultFiles) {
 
+        LOGGER.entry(qrelFiles,resultFiles);
+
         int qrelsLen = qrelFiles.length;
         int resultLen = resultFiles.length;
 
         if(qrelsLen != resultLen) {
-            LOGGER.log(Level.WARNING, "The number of files in the folders are different!");
+            LOGGER.warn("The number of files in the folders are different!");
         }
 
         for (int i = 0; i < qrelsLen && i < resultLen; ++i){
@@ -75,6 +82,8 @@ public class Evaluator {
             Evaluation eval = evaluateQueryResult(relevantDocSet,resultFiles[i]);
             this.queriesEvaluations.add(eval);
         }
+
+        LOGGER.exit();
     }
 
     /*
@@ -82,17 +91,18 @@ public class Evaluator {
      */
     private Evaluation evaluateQueryResult(Set<String> relevantDocSet, File result) {
 
+        LOGGER.entry(relevantDocSet,result);
+
         Scanner scanner;
 
         try {
             scanner = new Scanner(result);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "This should not happen.", e);
+            LOGGER.catching(e);
             return null;
         }
 
         return calculateEvaluation(relevantDocSet, scanner);
-
     }
 
     /*
@@ -101,6 +111,8 @@ public class Evaluator {
      */
     private Evaluation calculateEvaluation(Set<String> relevantDocSet,
             Scanner scanner) {
+
+        LOGGER.entry(relevantDocSet,scanner);
 
         Evaluation eval = new Evaluation();
         int i = 0;
@@ -114,7 +126,8 @@ public class Evaluator {
             }
             ++i;
         }
-        return eval;
+
+        return LOGGER.exit(eval);
     }
 
     /*
@@ -122,26 +135,30 @@ public class Evaluator {
      */
     private static Set<String> getRelevantDocSet(File qrel){
 
+        LOGGER.entry(qrel);
+
         Scanner scanner;
         Set<String> set = new HashSet<String>();
 
         try {
             scanner = new Scanner(qrel);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "This should not happen.", e);
+            LOGGER.catching(e);
             return set;
         }
 
         scanner.useLocale(Locale.FRANCE);
         addDocs(scanner, set);
 
-        return set;
+        return LOGGER.exit(set);
     }
 
     /*
      * Add a relevant doc to the set.
      */
     private static void addDocs(Scanner scanner, Set<String> set) {
+
+        LOGGER.entry(scanner, set);
 
         while(scanner.hasNext(DOC_NAME)){
             String doc = scanner.next(DOC_NAME);
@@ -151,9 +168,13 @@ public class Evaluator {
                 set.add(doc);
             }
         }
+
+        LOGGER.exit();
     }
 
     private static File[] listFiles(File folder) throws FileNotFoundException{
+
+        LOGGER.entry(folder);
 
         File[] fileList = folder.listFiles();
 
@@ -162,7 +183,7 @@ public class Evaluator {
                     + folder.getAbsolutePath());
         }
 
-        return fileList;
+        return LOGGER.exit(fileList);
     }
 
 }

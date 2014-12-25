@@ -3,12 +3,13 @@ package model.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ConnectionBuilder {
 
-    private static final Logger LOGGER = Logger.getLogger(ConnectionBuilder.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String DB_DRIVER = "org.postgresql.Driver";
 
     /* change these as needed */
@@ -23,7 +24,7 @@ public class ConnectionBuilder {
     // Get the connection to access the database
     public static Connection getConnection() {
 
-        LOGGER.log(Level.CONFIG, "Configuring the connection to the database.");
+        LOGGER.debug("Configuring the connection to the database.");
 
         if (!jdbcDriverExist()){
             return null;
@@ -36,7 +37,7 @@ public class ConnectionBuilder {
 
         } catch (SQLException e) {
 
-            LOGGER.log(Level.SEVERE, "Could not connect to data base.", e);
+            LOGGER.error("Could not connect to data base.", e);
             return null;
         }
 
@@ -51,7 +52,7 @@ public class ConnectionBuilder {
 
         } catch (ClassNotFoundException e) {
 
-            LOGGER.log(Level.SEVERE, "JDBC driver is not installed.", e);
+            LOGGER.error("JDBC driver is not installed.", e);
             return false;
         }
 

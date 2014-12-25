@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.database.DBAccessor;
 
@@ -14,7 +15,7 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
     private Map<String, Integer> map;
     private int documentId;
     private String documentName;
-    private static final Logger LOGGER = Logger.getLogger(InverseFile.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public InverseFile(int documentId, String documentName){
         this.documentId = documentId;
@@ -36,7 +37,7 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
      */
     public void addWord(String word){
 
-        LOGGER.log(Level.FINEST, "Calculating frequency for word " + word);
+        LOGGER.entry(word);
 
         int frequency = 1;
 
@@ -45,6 +46,7 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
         }
 
         map.put(word, frequency);
+        LOGGER.trace("Added word: {} with frequency: {}", word, frequency);
 
     }
 
@@ -52,6 +54,8 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
      * Stores the inverse file in the database.
      */
     public void storeInDB(){
+
+        LOGGER.entry();
 
         boolean stored = DBAccessor.storeDocument(this.documentId, this.documentName);
 
@@ -61,6 +65,8 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
                 DBAccessor.storeInverseTfEntry(elem.getKey(), documentId, elem.getValue());
             }
         }
+
+        LOGGER.exit();
     }
 
     @Override

@@ -6,8 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,7 +37,7 @@ import org.xml.sax.SAXException;
  */
 public class SparqlClient {
 
-    private static final Logger LOGGER = Logger.getLogger(SparqlClient.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     // Address of the server
     private String endpointUri;
@@ -57,9 +58,11 @@ public class SparqlClient {
      */
     public SparqlResult select(String queryString) {
 
+        LOGGER.entry(queryString);
+
         Document document = getXMLFromServer(queryString);
         NodeList resultNodes = document.getElementsByTagName("result");
-        return getResults(resultNodes);
+        return LOGGER.exit(getResults(resultNodes));
     }
 
 
@@ -145,6 +148,8 @@ public class SparqlClient {
      */
     public boolean ask(String queryString) {
 
+        LOGGER.entry(queryString);
+
         Document document = getXMLFromServer(queryString);
         NodeList list = document.getElementsByTagName("boolean");
         Node xmlNode = list.item(0);
@@ -165,18 +170,16 @@ public class SparqlClient {
             return parser.parse(uri.toString());
 
         } catch (SAXException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "A problem was found parsing the file from server.", ex);
+            LOGGER.fatal("A problem was found parsing the file from server.", ex);
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, "There were problems to connect to the server", ex);
+            LOGGER.fatal("There were problems to connect to the server", ex);
         } catch (ParserConfigurationException ex) {
-            LOGGER.log(Level.SEVERE, "XML/HTML Parser could not be created.", ex);
+            LOGGER.fatal("XML/HTML Parser could not be created.", ex);
         } catch (URISyntaxException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "Found a malformed URI when trying to connect to server.", ex);
+            LOGGER.fatal("Found a malformed URI when trying to connect to server.", ex);
         }
 
-        return null;
+        return newEmptyDocument();
     }
 
     /*
@@ -212,8 +215,7 @@ public class SparqlClient {
                 request.releaseConnection();
             }
         } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE,
-                    "There were problems to connect to the server", ex);
+            LOGGER.error("There were problems to connect to the server", ex);
         }
     }
 
@@ -233,4 +235,22 @@ public class SparqlClient {
         httpPost.setEntity(new UrlEncodedFormEntity(pairList));
         return httpPost;
     }
+
+    private static Document newEmptyDocument() {
+
+        DocumentBuilderFactory factory = null;
+        DocumentBuilder builder = null;
+        Document doc;
+
+        try {
+            factory = DocumentBuilderFactory.newInstance();
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            LOGGER.error("There were problems creating an empty document", e);
+        }
+
+        doc = builder.newDocument();
+
+        return doc;
+      }
 }

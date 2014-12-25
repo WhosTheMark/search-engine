@@ -2,8 +2,12 @@ package model;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Evaluation {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     private float precision5 = 0;
     private float precision10 = 0;
     private float precision25 = 0;
@@ -41,14 +45,20 @@ public class Evaluation {
      * Document found is a relevant doc
      */
     public void foundRelevantDoc(){
+
+        LOGGER.entry();
         ++totalDocsFound;
         ++relevantDocsFound;
         updatePrecision();
+        LOGGER.exit();
     }
 
     public void foundNotRelevantDoc(){
+
+        LOGGER.entry();
         ++totalDocsFound;
         updatePrecision();
+        LOGGER.exit();
     }
 
     private void updatePrecision() {
@@ -69,25 +79,32 @@ public class Evaluation {
 
     public static Evaluation calculateAverage(List<Evaluation> list){
 
+        LOGGER.entry(list);
         Evaluation evaluation = new Evaluation();
         sumPrecisions(evaluation, list);
         divideByTotal(evaluation, list);
 
-        return evaluation;
+        return LOGGER.exit(evaluation);
     }
 
     private static void sumPrecisions(Evaluation evaluation,
             List<Evaluation> list) {
+
+        LOGGER.entry(evaluation,list);
 
         for(Evaluation eval: list){
             evaluation.precision5 += eval.getPrecision5();
             evaluation.precision10 += eval.getPrecision10();
             evaluation.precision25 += eval.getPrecision25();
         }
+
+        LOGGER.exit();
     }
 
     private static void divideByTotal(Evaluation evaluation,
             List<Evaluation> list) {
+
+        LOGGER.entry(evaluation,list);
 
         int total = list.size();
 
@@ -96,6 +113,8 @@ public class Evaluation {
             evaluation.precision10 = evaluation.precision10 / (float)total;
             evaluation.precision25 = evaluation.precision25 / (float)total;
         }
+
+        LOGGER.exit();
     }
 
     public String toString(){

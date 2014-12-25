@@ -3,8 +3,12 @@ package model.sparql;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class SparqlAccessor {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     // Connection to the server.
     private SparqlClient client;
     private static final String PREFIXES =
@@ -18,6 +22,8 @@ public class SparqlAccessor {
     }
 
     public List<String> getOtherLabels(String label){
+
+        LOGGER.entry(label);
 
         List<String> list = new ArrayList<String>();
 
@@ -33,7 +39,7 @@ public class SparqlAccessor {
             list.add(value);
         }
 
-        return list;
+        return LOGGER.exit(list);
     }
 
 }

@@ -3,14 +3,15 @@ package model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.calculators.RelevanceCalculator;
 
 public class EnhancedSearcher extends Searcher {
 
-    private static final Logger LOGGER = Logger.getLogger(EnhancedSearcher.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private QueryEnhancer enhancer;
     private static final int DEFAULT_WEIGHT = 5;
     private static final int ENHANCED_WEIGHT = 1;
@@ -23,7 +24,7 @@ public class EnhancedSearcher extends Searcher {
     @Override
     public List<RelevantDocument> executeQuery(String query) {
 
-        LOGGER.log(Level.FINE, "Excecuting query " + query + "with enhancement.");
+        LOGGER.debug("Excecuting query {} with enhancement.", query);
 
         List<String> enhancerWords = enhancer.enhanceQuery(query);
 
@@ -39,18 +40,20 @@ public class EnhancedSearcher extends Searcher {
     private void setWeights(List<WeightedKeyword> weigthedKeywords,
             List<String> enhancerWords, int weight) {
 
-        LOGGER.log(Level.FINEST, "Setting weights.");
+        LOGGER.entry(weigthedKeywords, enhancerWords, weight);
 
         for(String enhancerWord : enhancerWords) {
             WeightedKeyword wk = new WeightedKeyword(enhancerWord,weight);
             weigthedKeywords.add(wk);
         }
+
+        LOGGER.exit();
     }
 
     public List<RelevantDocument> executeQuery(List<WeightedKeyword> keywords){
 
-        LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
-                + keywords + ".");
+        LOGGER.entry(keywords);
+        LOGGER.info("Calculating relevant documents for the query: {}.", keywords);
 
         for (WeightedKeyword keyword : keywords) {
             List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keyword.getKeyword());

@@ -48,4 +48,21 @@ public class SparqlResult {
 
         return results.get(currentRow).get(key);
     }
+
+    @Override
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for(Map<String,String> map : results){
+
+            sb.append("[");
+            for(Map.Entry<String, String>entry : map.entrySet()){
+                sb.append("(" + entry.getKey() + "," + entry.getValue() + "),");
+            }
+            sb.append("]\n");
+        }
+
+        return sb.toString();
+    }
 }

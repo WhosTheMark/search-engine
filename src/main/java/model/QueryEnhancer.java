@@ -1,15 +1,17 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.sparql.SparqlAccessor;
 
 public class QueryEnhancer {
 
-    private static final Logger LOGGER = Logger.getLogger(QueryEnhancer.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private SparqlAccessor sparqlDAO;
     private static final String SEPARATOR_REGEXP = ",";
 
@@ -19,12 +21,15 @@ public class QueryEnhancer {
 
     public List<String> enhanceQuery(String query){
 
-        LOGGER.log(Level.INFO, "Procesing original query: " + query);
+        LOGGER.info("Procesing original query: {}.", query);
+
         String[] terms = query.split(SEPARATOR_REGEXP);
         return enhanceQuery(terms);
     }
 
     public List<String> enhanceQuery(String[] terms){
+
+        LOGGER.entry(Arrays.toString(terms));
 
         List<String> list = new ArrayList<String>();
 
@@ -35,13 +40,13 @@ public class QueryEnhancer {
             addLabelsToList(labels, list);
         }
 
-        LOGGER.log(Level.INFO, "Found " + list.size() + " word(s) to enhance query: "
-                + list);
-
+        LOGGER.debug("Found {} word(s) to enhance query: {}.", list.size(), list);
         return list;
     }
 
     private void addLabelsToList(List<String> labels, List<String> list) {
+
+        LOGGER.entry(labels,list);
 
         for (String label: labels) {
 
@@ -51,6 +56,8 @@ public class QueryEnhancer {
                 list.add(normLabel);
             }
         }
+
+        LOGGER.exit();
     }
 
 }

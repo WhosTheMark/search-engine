@@ -2,8 +2,9 @@ package model.calculators;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.RelevantDocument;
 
@@ -12,8 +13,7 @@ import model.RelevantDocument;
  */
 public class InnerProductCalculator extends RelevanceCalculator {
 
-    private static final Logger LOGGER = Logger.getLogger(
-            InnerProductCalculator.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private List<RelevantDocument> accumDocs;
 
@@ -32,7 +32,8 @@ public class InnerProductCalculator extends RelevanceCalculator {
     @Override
     public void addDocuments(int weight, List<RelevantDocument> relevDocs) {
 
-        LOGGER.log(Level.FINER, "Calculating relevance using inner product.");
+        LOGGER.trace("Calculating relevance using inner product using weight {}.",
+                weight);
 
         List<RelevantDocument> result = new ArrayList<RelevantDocument>();
         int i = 0;
@@ -73,10 +74,6 @@ public class InnerProductCalculator extends RelevanceCalculator {
      */
     private void addLastElems(int index, int weight, List<RelevantDocument> list,
             List<RelevantDocument> result){
-
-        LOGGER.log(Level.FINEST,
-                "Adding the last elements on the list starting at index: "
-                + index);
 
         for (; index < list.size(); ++index) {
             RelevantDocument elem = list.get(index);

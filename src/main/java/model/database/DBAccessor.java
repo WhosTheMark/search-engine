@@ -6,14 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.RelevantDocument;
 
 public class DBAccessor {
 
-    private static final Logger LOGGER = Logger.getLogger(DBAccessor.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Connection CONNECTION = ConnectionBuilder.getConnection();
 
     //Names of tables
@@ -42,7 +43,7 @@ public class DBAccessor {
      */
     public static boolean storeDocument(int idDocument, String documentName) {
 
-        LOGGER.log(Level.FINE, "Storing document " + documentName);
+        LOGGER.debug("Storing document {}.", documentName);
 
         try {
 
@@ -52,7 +53,7 @@ public class DBAccessor {
             prepstmt.executeUpdate();
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Could not add a document to database.", e);
+            LOGGER.error("Could not add a document to database.", e);
             return false;
         }
 
@@ -61,7 +62,7 @@ public class DBAccessor {
 
     public static int getNumberOfDocuments(){
 
-        LOGGER.log(Level.FINEST, "Getting the number of docs");
+        LOGGER.trace("Getting the number of docs");
 
         ResultSet rs;
         try {
@@ -75,8 +76,7 @@ public class DBAccessor {
             return rs.getInt(1);
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "There is not a table " + DOC_TABLE 
-                    + " in the database.", e);
+            LOGGER.fatal("There is not a table " + DOC_TABLE + " in the database.", e);
             return -1;
         }
     }
@@ -84,9 +84,6 @@ public class DBAccessor {
      * Checks if a wordExists in the database.
      */
     private static boolean wordExists(String word) throws SQLException {
-
-        LOGGER.log(Level.FINEST, "Checking if word " + word
-                + "exists in database.");
 
         PreparedStatement prepstmt = CONNECTION.prepareStatement(SELECT_WORD);
         prepstmt.setString(1, word);
@@ -100,8 +97,6 @@ public class DBAccessor {
      */
     public static void storeWord(String word) {
 
-        LOGGER.log(Level.FINER, "Storing word " + word);
-
         try {
 
             if (!wordExists(word)) {
@@ -114,7 +109,7 @@ public class DBAccessor {
             }
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Could not store a word in the database", e);
+            LOGGER.error("Could not store a word in the database", e);
         }
     }
 
@@ -132,8 +127,6 @@ public class DBAccessor {
 
     private static void storeInverseEntry(String word, int document,
             float weight, String table) {
-        LOGGER.log(Level.FINER, "Inserting index entry with word: " + word
-                + " document id: " + document + " and weight: " + weight);
 
         String strStmt = "INSERT INTO " + table + " VALUES (?,?,?);";
 
@@ -146,8 +139,7 @@ public class DBAccessor {
             prepstmt.execute();
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Could not store index in the database.",
-                    e);
+            LOGGER.error("Could not store index in the database.",e);
         }
     }
 
@@ -156,7 +148,7 @@ public class DBAccessor {
      */
     public static List<RelevantDocument> getRelevantDocsTf(String word) {
 
-        LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
+        LOGGER.trace("Getting relevant documents of the word {} using tf.", word);
 
         return getRelevantDocs(word,INDEX_TABLE);
     }
@@ -166,7 +158,7 @@ public class DBAccessor {
      */
     public static List<RelevantDocument> getRelevantDocsTfIdf(String word) {
 
-        LOGGER.log(Level.FINE, "Getting relevant documents of the word " + word);
+        LOGGER.trace("Getting relevant documents of the word {} using tf-idf.", word);
 
         return getRelevantDocs(word,INDEX_TF_IDF_TABLE);
     }
@@ -186,11 +178,11 @@ public class DBAccessor {
             list = buildRelevantDocList(rs);
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE,
-                    "A problem occurred getting the relevant documents of a word.",
+            LOGGER.error("A problem occurred getting the relevant documents of a word.",
                     e);
             list = new ArrayList<RelevantDocument>();
         }
+
         return list;
     }
 
@@ -221,7 +213,7 @@ public class DBAccessor {
      */
     public static void eraseDB() {
 
-        LOGGER.log(Level.CONFIG, "Deleting info from databse.");
+        LOGGER.debug("Deleting info from databse.");
 
         try {
             PreparedStatement prepstmt = CONNECTION.prepareStatement(DELETE_STMT);
@@ -235,8 +227,7 @@ public class DBAccessor {
             prepstmt.executeUpdate();
 
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE,
-                    "A problem occurred ereasing the tables of the database.",
+            LOGGER.error("A problem occurred ereasing the tables of the database.",
                     e);
         }
 

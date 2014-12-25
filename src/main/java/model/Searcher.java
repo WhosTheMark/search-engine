@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import model.calculators.RelevanceCalculator;
 
@@ -17,7 +18,7 @@ import model.calculators.RelevanceCalculator;
  */
 public class Searcher {
 
-    private static final Logger LOGGER = Logger.getLogger(Searcher.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger();
     private String resultFolder;
 
     // Implements strategy pattern to use different calculators
@@ -32,6 +33,8 @@ public class Searcher {
 
     public List<RelevantDocument> executeQuery(String query) {
 
+        LOGGER.entry(query);
+
         String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
         return executeQuery(keywords);
     }
@@ -39,15 +42,15 @@ public class Searcher {
 
     public List<RelevantDocument> executeQuery(String[] keywords) {
 
-        LOGGER.log(Level.INFO, "Calculating relevant documents for the query: "
-                + Arrays.toString(keywords) + ".");
+        LOGGER.info("Calculating relevant documents for the query: {}.",
+                Arrays.toString(keywords));
 
         for (int i = 0; i < keywords.length; ++i) {
             List<RelevantDocument> relevantDocs = getRelevantDocsOfKeyword(keywords[i]);
             calculator.addDocuments(relevantDocs);
         }
 
-        return sortRelevantDocs();
+        return LOGGER.exit(sortRelevantDocs());
 
     }
 
@@ -60,8 +63,8 @@ public class Searcher {
 
     protected List<RelevantDocument> getRelevantDocsOfKeyword(String keyword) {
 
-        LOGGER.log(Level.FINER, "Calculating relevant documents for the keyword "
-                + keyword + ".");
+        LOGGER.debug("Calculating relevant documents for the keyword {}.",
+                keyword);
 
         String normalizedKeyword = Indexation.normalizeWord(keyword);
 
@@ -76,7 +79,7 @@ public class Searcher {
         try {
             scanner = new Scanner (file);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "File " + file.getName() + "not found.", e);
+            LOGGER.fatal("File " + file.getName() + "not found.", e);
             return;
         }
 
@@ -89,7 +92,7 @@ public class Searcher {
 
         executeQueries(scanner);
 
-        LOGGER.log(Level.INFO, "Search finished.");
+        LOGGER.info("Search finished.");
     }
 
     // Get the relevant documents of a query and store them in a file.
@@ -108,7 +111,7 @@ public class Searcher {
      */
     private void writeResultToFile(List<RelevantDocument> docs, int queryID){
 
-        LOGGER.log(Level.FINE, "Writing the result of query number "+ queryID + ".");
+        LOGGER.debug("Writing the result of query number {}.", queryID);
         PrintWriter writer = null;
 
         // Opens a file or creates it to store the results.
@@ -118,8 +121,7 @@ public class Searcher {
 
         } catch (FileNotFoundException e) {
 
-            LOGGER.log(Level.SEVERE, "File qrelQ" + queryID +
-                    ".txt could not be created", e);
+            LOGGER.error("File qrelQ" + queryID + ".txt could not be created", e);
             return;
         }
 
@@ -138,13 +140,13 @@ public class Searcher {
         File folder = new File(resultFolder);
 
         if (!folder.exists()) {
-            LOGGER.log(Level.CONFIG, "Creating results foder.");
+            LOGGER.debug("Creating results folder {}.", folder.getAbsolutePath());
             folder.mkdir();
         }
 
         if (!folder.exists()) {
-            LOGGER.log(Level.SEVERE, "Could not create folder "
-                    + folder.getPath() + " to store results.");
+            LOGGER.fatal("Could not create folder {} to store results.",
+                    folder.getAbsolutePath());
             return false;
         }
 
