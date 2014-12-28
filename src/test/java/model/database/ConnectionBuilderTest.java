@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.sql.Connection;
 
-import model.database.ConnectionBuilder;
+import model.database.layer.ConnectionBuilder;
 
 import org.junit.Test;
 

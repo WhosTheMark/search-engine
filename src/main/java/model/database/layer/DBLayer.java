@@ -1,4 +1,4 @@
-package model.database;
+package model.database.layer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,10 +12,9 @@ import org.apache.logging.log4j.Logger;
 
 import model.RelevantDocument;
 
-public class DBAccessor {
+public class DBLayer {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Connection CONNECTION = ConnectionBuilder.getConnection();
 
     //Names of tables
     private static final String WORD_TABLE = "word";
@@ -34,20 +33,22 @@ public class DBAccessor {
 
     private static final String DELETE_STMT = "DELETE FROM ?";
 
-    // To avoid instantiation
-    private DBAccessor() {
+    private Connection connection;
+
+    public DBLayer() {
+        connection = ConnectionBuilder.getConnection();
     }
 
     /*
      * Store a document in the database.
      */
-    public static boolean storeDocument(int idDocument, String documentName) {
+    public boolean storeDocument(int idDocument, String documentName) {
 
         LOGGER.debug("Storing document {}.", documentName);
 
         try {
 
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(INSERT_DOC);
+            PreparedStatement prepstmt = connection.prepareStatement(INSERT_DOC);
             prepstmt.setInt(1, idDocument);
             prepstmt.setString(2, documentName);
             prepstmt.executeUpdate();
@@ -60,13 +61,13 @@ public class DBAccessor {
         return true;
     }
 
-    public static int getNumberOfDocuments(){
+    public int getNumberOfDocuments(){
 
         LOGGER.trace("Getting the number of docs");
 
         ResultSet rs;
         try {
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(SELECT_NUMBER_OF_DOCS);
+            PreparedStatement prepstmt = connection.prepareStatement(SELECT_NUMBER_OF_DOCS);
             rs = prepstmt.executeQuery();
 
             if(!rs.next()){
@@ -83,9 +84,9 @@ public class DBAccessor {
     /*
      * Checks if a wordExists in the database.
      */
-    private static boolean wordExists(String word) throws SQLException {
+    private boolean wordExists(String word) throws SQLException {
 
-        PreparedStatement prepstmt = CONNECTION.prepareStatement(SELECT_WORD);
+        PreparedStatement prepstmt = connection.prepareStatement(SELECT_WORD);
         prepstmt.setString(1, word);
         ResultSet rs = prepstmt.executeQuery();
 
@@ -95,13 +96,13 @@ public class DBAccessor {
     /*
      * Store a word in the database.
      */
-    public static void storeWord(String word) {
+    public void storeWord(String word) {
 
         try {
 
             if (!wordExists(word)) {
 
-                PreparedStatement prepstmt = CONNECTION
+                PreparedStatement prepstmt = connection
                         .prepareStatement(INSERT_WORD);
                 prepstmt.setString(1, word);
                 prepstmt.executeUpdate();
@@ -116,23 +117,23 @@ public class DBAccessor {
     /*
      * Store an entry of the inverse file in the database.
      */
-    public static void storeInverseTfEntry(String word, int document, float weight) {
+    public void storeInverseTfEntry(String word, int document, float weight) {
 
         storeInverseEntry(word, document, weight, INDEX_TABLE);
     }
 
-    public static void storeInverseTfIdfEntry(String word, int document, float weight) {
+    public void storeInverseTfIdfEntry(String word, int document, float weight) {
         storeInverseEntry(word, document, weight, INDEX_TF_IDF_TABLE);
     }
 
-    private static void storeInverseEntry(String word, int document,
+    private void storeInverseEntry(String word, int document,
             float weight, String table) {
 
         String strStmt = "INSERT INTO " + table + " VALUES (?,?,?);";
 
         try {
 
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(strStmt);
+            PreparedStatement prepstmt = connection.prepareStatement(strStmt);
             prepstmt.setString(1, word);
             prepstmt.setInt(2, document);
             prepstmt.setFloat(3, weight);
@@ -146,7 +147,7 @@ public class DBAccessor {
     /*
      * Returns the list of relevant document of a word using Term Frequency.
      */
-    public static List<RelevantDocument> getRelevantDocsTf(String word) {
+    public List<RelevantDocument> getRelevantDocsTf(String word) {
 
         LOGGER.trace("Getting relevant documents of the word {} using tf.", word);
 
@@ -156,14 +157,14 @@ public class DBAccessor {
     /*
      * Returns the list of relevant document of a word using tf-idf.
      */
-    public static List<RelevantDocument> getRelevantDocsTfIdf(String word) {
+    public List<RelevantDocument> getRelevantDocsTfIdf(String word) {
 
         LOGGER.trace("Getting relevant documents of the word {} using tf-idf.", word);
 
         return getRelevantDocs(word,INDEX_TF_IDF_TABLE);
     }
 
-    private static List<RelevantDocument> getRelevantDocs(String word, String table) {
+    private List<RelevantDocument> getRelevantDocs(String word, String table) {
 
         String strQuery = "SELECT * FROM " + table + " , " + DOC_TABLE
                 + " WHERE id_document = document AND id_word=? "
@@ -172,7 +173,7 @@ public class DBAccessor {
         List<RelevantDocument> list;
 
         try {
-            prepstmt = CONNECTION.prepareStatement(strQuery);
+            prepstmt = connection.prepareStatement(strQuery);
             prepstmt.setString(1, word);
             ResultSet rs = prepstmt.executeQuery();
             list = buildRelevantDocList(rs);
@@ -189,7 +190,7 @@ public class DBAccessor {
     /*
      * Builds relevant document list using a result set.
      */
-    private static List<RelevantDocument> buildRelevantDocList(ResultSet rs)
+    private List<RelevantDocument> buildRelevantDocList(ResultSet rs)
             throws SQLException{
 
         List<RelevantDocument> list = new ArrayList<RelevantDocument>();
@@ -211,12 +212,12 @@ public class DBAccessor {
     /*
      * Deletes the information of the tables in the database.
      */
-    public static void eraseDB() {
+    public void eraseDB() {
 
         LOGGER.debug("Deleting info from databse.");
 
         try {
-            PreparedStatement prepstmt = CONNECTION.prepareStatement(DELETE_STMT);
+            PreparedStatement prepstmt = connection.prepareStatement(DELETE_STMT);
             prepstmt.setString(1, INDEX_TABLE);
             prepstmt.executeUpdate();
             prepstmt.setString(1, WORD_TABLE);
@@ -231,6 +232,16 @@ public class DBAccessor {
                     e);
         }
 
+    }
+
+    public void finalize(){
+
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            LOGGER.error("A problem occurred closing the connection of the database.",
+                    e);
+        }
     }
 
 }

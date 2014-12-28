@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import model.calculators.RelevanceCalculator;
+import model.database.DAO.RelevantDocumentDAO;
 
 /*
  * Searches relevant documents in the database.
@@ -23,15 +24,22 @@ public class Searcher {
 
     // Implements strategy pattern to use different calculators
     protected RelevanceCalculator calculator;
-
+    private RelevantDocumentDAO relvDocDAO;
 
     public Searcher(RelevanceCalculator calculator, String resultFolder) {
         this.calculator = calculator;
         this.resultFolder = resultFolder;
     }
 
+    public List<RelevantDocument> executeSingleQuery(String query) {
 
-    public List<RelevantDocument> executeQuery(String query) {
+        relvDocDAO = new RelevantDocumentDAO();
+        List<RelevantDocument> list = executeQuery(query);
+        relvDocDAO.finalize();
+        return list;
+    }
+
+    protected List<RelevantDocument> executeQuery(String query) {
 
         LOGGER.entry(query);
 
@@ -40,7 +48,7 @@ public class Searcher {
     }
 
 
-    public List<RelevantDocument> executeQuery(String[] keywords) {
+    private List<RelevantDocument> executeQuery(String[] keywords) {
 
         LOGGER.info("Calculating relevant documents for the query: {}.",
                 Arrays.toString(keywords));
@@ -68,7 +76,7 @@ public class Searcher {
 
         String normalizedKeyword = Indexation.normalizeWord(keyword);
 
-        return RelevantDocument.getRelevantDocs(normalizedKeyword);
+        return relvDocDAO.getRelevantDocs(normalizedKeyword);
     }
 
 
@@ -98,12 +106,16 @@ public class Searcher {
     // Get the relevant documents of a query and store them in a file.
     private void executeQueries(Scanner scanner) {
 
+        relvDocDAO = new RelevantDocumentDAO();
+
         for(int i = 1; scanner.hasNextLine(); ++i){
 
             String query = scanner.nextLine();
             List<RelevantDocument> docs = executeQuery(query);
             writeResultToFile(docs,i);
         }
+
+        relvDocDAO.finalize();
     }
 
     /*

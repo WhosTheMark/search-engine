@@ -8,8 +8,6 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.database.DBAccessor;
-
 public class InverseFile implements Iterable<Entry<String, Integer>> {
 
     private Map<String, Integer> map;
@@ -50,24 +48,6 @@ public class InverseFile implements Iterable<Entry<String, Integer>> {
 
     }
 
-    /*
-     * Stores the inverse file in the database.
-     */
-    public void storeInDB(){
-
-        LOGGER.entry();
-
-        boolean stored = DBAccessor.storeDocument(this.documentId, this.documentName);
-
-        if (stored) {
-            for (Entry<String, Integer> elem : this) {
-                DBAccessor.storeWord(elem.getKey());
-                DBAccessor.storeInverseTfEntry(elem.getKey(), documentId, elem.getValue());
-            }
-        }
-
-        LOGGER.exit();
-    }
 
     @Override
     public Iterator<Entry<String, Integer>> iterator() {

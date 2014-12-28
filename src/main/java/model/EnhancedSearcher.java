@@ -22,7 +22,7 @@ public class EnhancedSearcher extends Searcher {
     }
 
     @Override
-    public List<RelevantDocument> executeQuery(String query) {
+    protected List<RelevantDocument> executeQuery(String query) {
 
         LOGGER.debug("Excecuting query {} with enhancement.", query);
 

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import model.database.DAO.InverseFileDAO;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -54,12 +56,15 @@ public class Indexation {
         LOGGER.info("Index process started.");
 
         int documentId = 0;
+        InverseFileDAO invDAO = new InverseFileDAO();
 
         for (File file : listOfFiles) {
             LOGGER.info("Indexing file: {}.", file.getName());
             InverseFile invFile = indexFile(file, documentId++, stopWordsSet);
-            invFile.storeInDB();
+            invDAO.store(invFile);
         }
+
+        invDAO.finalize();
 
         LOGGER.info("Index finished.");
     }
