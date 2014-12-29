@@ -1,9 +1,9 @@
-package model;
+package model.search;
 
-public class WeightedKeyword {
+public final class WeightedKeyword {
 
-    private String keyword;
-    private int weight;
+    private final String keyword;
+    private final int weight;
 
     public WeightedKeyword(String keyword, int weight) {
         super();

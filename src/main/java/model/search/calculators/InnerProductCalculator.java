@@ -1,4 +1,4 @@
-package model.calculators;
+package model.search.calculators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.RelevantDocument;
+import model.search.RelevantDocument;
 
 /*
  * Calculates relevant documents by using inner product.

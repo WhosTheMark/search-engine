@@ -3,6 +3,9 @@ package model;
 import java.io.File;
 import java.util.List;
 
+import model.evaluation.Evaluation;
+import model.evaluation.Evaluator;
+
 import org.junit.Test;
 
 public class EvaluatorTest {

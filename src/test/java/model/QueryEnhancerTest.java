@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import model.search.QueryEnhancer;
+
 import org.junit.Test;
 
 public class QueryEnhancerTest {

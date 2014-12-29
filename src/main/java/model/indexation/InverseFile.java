@@ -1,4 +1,4 @@
-package model;
+package model.indexation;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,8 +11,8 @@ import org.apache.logging.log4j.Logger;
 public class InverseFile implements Iterable<Entry<String, Integer>> {
 
     private Map<String, Integer> map;
-    private int documentId;
-    private String documentName;
+    private final int documentId;
+    private final String documentName;
     private static final Logger LOGGER = LogManager.getLogger();
 
     public InverseFile(int documentId, String documentName){

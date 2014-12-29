@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.RelevantDocument;
 import model.database.layer.DBLayer;
+import model.search.RelevantDocument;
 
 public class RelevantDocumentDAO {
 

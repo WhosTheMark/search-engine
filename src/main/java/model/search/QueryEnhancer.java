@@ -1,4 +1,4 @@
-package model;
+package model.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import model.indexation.Indexer;
 import model.sparql.SparqlAccessor;
 
 public class QueryEnhancer {
@@ -50,7 +51,7 @@ public class QueryEnhancer {
 
         for (String label: labels) {
 
-            String[] normalizedLabels = label.split(Indexation.SEPARATOR_REGEXP);
+            String[] normalizedLabels = label.split(Indexer.SEPARATOR_REGEXP);
 
             for (String normLabel : normalizedLabels){
                 list.add(normLabel);

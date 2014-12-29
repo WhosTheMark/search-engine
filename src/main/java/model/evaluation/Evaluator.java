@@ -1,4 +1,4 @@
-package model;
+package model.evaluation;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -2,11 +2,11 @@ package model;
 
 import java.io.File;
 
-import model.Indexation;
+import model.indexation.Indexer;
 
 import org.junit.Test;
 
-public class IndexationTest {
+public class IndexerTest {
 
     @Test
     public void test() {
@@ -16,7 +16,7 @@ public class IndexationTest {
         File folder = new File("extra/CORPUS");
         File stopWordsfile = new File("extra/stopliste.txt");
 
-        Indexation.startIndexation(stopWordsfile, folder);
+        Indexer.startIndexation(stopWordsfile, folder);
 
         long end = System.currentTimeMillis();
 

@@ -2,8 +2,9 @@ package model;
 
 import java.io.File;
 
-import model.calculators.InnerProductCalculator;
-import model.calculators.RelevanceCalculator;
+import model.search.EnhancedSearcher;
+import model.search.calculators.InnerProductCalculator;
+import model.search.calculators.RelevanceCalculator;
 
 import org.junit.Test;
 

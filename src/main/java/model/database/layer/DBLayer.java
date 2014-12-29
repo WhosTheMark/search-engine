@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.RelevantDocument;
+import model.search.RelevantDocument;
 
 public class DBLayer {
 
@@ -110,7 +110,8 @@ public class DBLayer {
             }
 
         } catch (SQLException e) {
-            LOGGER.error("Could not store a word in the database", e);
+            LOGGER.warn("Could not store word \"{}\" in the database, "
+                    + "other thread might have stored it.", word);
         }
     }
 

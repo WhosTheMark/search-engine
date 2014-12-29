@@ -1,4 +1,4 @@
-package model;
+package model.search;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,8 +11,9 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.calculators.RelevanceCalculator;
 import model.database.DAO.RelevantDocumentDAO;
+import model.indexation.Indexer;
+import model.search.calculators.RelevanceCalculator;
 
 /*
  * Searches relevant documents in the database.
@@ -20,7 +21,7 @@ import model.database.DAO.RelevantDocumentDAO;
 public class Searcher {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private String resultFolder;
+    private final String resultFolder;
 
     // Implements strategy pattern to use different calculators
     protected RelevanceCalculator calculator;
@@ -43,7 +44,7 @@ public class Searcher {
 
         LOGGER.entry(query);
 
-        String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
+        String[] keywords = query.split(Indexer.SEPARATOR_REGEXP);
         return executeQuery(keywords);
     }
 
@@ -74,7 +75,7 @@ public class Searcher {
         LOGGER.debug("Calculating relevant documents for the keyword {}.",
                 keyword);
 
-        String normalizedKeyword = Indexation.normalizeWord(keyword);
+        String normalizedKeyword = Indexer.normalizeWord(keyword);
 
         return relvDocDAO.getRelevantDocs(normalizedKeyword);
     }

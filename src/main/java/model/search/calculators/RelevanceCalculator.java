@@ -1,8 +1,8 @@
-package model.calculators;
+package model.search.calculators;
 
 import java.util.List;
 
-import model.RelevantDocument;
+import model.search.RelevantDocument;
 
 /*
  * Interface to implement Strategy Pattern.

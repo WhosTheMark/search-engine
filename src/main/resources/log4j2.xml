@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
   <Appenders>
-    <Console name="ConsoleDebug" target="SYSTEM_OUT">
-      <PatternLayout pattern="%-5level %logger{36} %M - %msg%n"/>
+    <Console name="Consoledebug" target="SYSTEM_OUT">
+      <PatternLayout pattern="%r %-5level %t %logger{36} %M - %msg%n"/>
     </Console>
-  </Appenders>
-  <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout pattern="%-5level - %msg%n"/>
     </Console>
+    <File name="File" append="false" fileName="extra/log">
+      <PatternLayout pattern="%r %-5level %t %logger{36} %M - %msg%n"/>
+    </File>
   </Appenders>
   <Loggers>
-    <Root level="info">
-      <AppenderRef ref="Console"/>
+    <Root level="all">
+      <AppenderRef ref="Console" level="info"/>
+      <AppenderRef ref="File" level="debug"/>
     </Root>
   </Loggers>
 </Configuration>

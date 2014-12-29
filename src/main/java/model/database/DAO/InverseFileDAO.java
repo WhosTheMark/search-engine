@@ -5,8 +5,8 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.InverseFile;
 import model.database.layer.DBLayer;
+import model.indexation.InverseFile;
 
 public class InverseFileDAO {
 

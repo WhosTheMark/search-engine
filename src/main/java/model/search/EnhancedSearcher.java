@@ -1,4 +1,4 @@
-package model;
+package model.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.calculators.RelevanceCalculator;
+import model.indexation.Indexer;
+import model.search.calculators.RelevanceCalculator;
 
 public class EnhancedSearcher extends Searcher {
 
@@ -31,7 +32,7 @@ public class EnhancedSearcher extends Searcher {
         List<WeightedKeyword> weigthedKeywords = new ArrayList<WeightedKeyword>();
         setWeights(weigthedKeywords, enhancerWords, ENHANCED_WEIGHT);
 
-        String[] keywords = query.split(Indexation.SEPARATOR_REGEXP);
+        String[] keywords = query.split(Indexer.SEPARATOR_REGEXP);
         setWeights(weigthedKeywords,Arrays.asList(keywords), DEFAULT_WEIGHT);
 
         return executeQuery(weigthedKeywords);

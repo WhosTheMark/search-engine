@@ -1,12 +1,12 @@
-package model;
+package model.search;
 
 /*
  * Stores the data of a relevant document.
  */
 public class RelevantDocument implements Comparable<RelevantDocument> {
 
-    private int documentId;
-    private String documentName;
+    private final int documentId;
+    private final String documentName;
     private float weight = 0;
 
     public RelevantDocument(int documentId, String documentName, float weight) {
