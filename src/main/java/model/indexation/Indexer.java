@@ -15,6 +15,7 @@ public class Indexer {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
     private static final int WORD_MAX_LENGTH = 7;
+    private static final int THREADS_NUM = 20;
 
     // To avoid instantiation
     private Indexer() {
@@ -47,20 +48,39 @@ public class Indexer {
         LOGGER.entry(listOfFiles, stopWordsSet);
         LOGGER.info("Index process started.");
 
-        Thread thread1 = new Thread(new IndexerRunnable(listOfFiles,stopWordsSet));
-        Thread thread2 = new Thread(new IndexerRunnable(listOfFiles,stopWordsSet));
+        Thread[] threads = initializeThreads(listOfFiles, stopWordsSet);
+        waitForThreads(threads);
 
-        thread1.start();
-        thread2.start();
+        LOGGER.info("Index finished.");
+    }
+
+    private static Thread[] initializeThreads(File[] listOfFiles,
+            Set<String> stopWordsSet) {
+
+        Thread[] threads = new Thread[THREADS_NUM];
+
+        for(int i = 0; i < threads.length; ++i){
+            threads[i] = new Thread(new IndexerRunnable(listOfFiles,stopWordsSet));
+        }
+
+        for(Thread thread : threads){
+            thread.start();
+        }
+
+        return threads;
+    }
+
+    private static void waitForThreads(Thread[] threads) {
 
         try {
-            thread1.join();
-            thread2.join();
+
+            for(Thread thread : threads){
+                thread.join();
+            }
+
         } catch (InterruptedException e) {
             LOGGER.error("Main thread was interrupted while waiting for other threads.",e);
         }
-
-        LOGGER.info("Index finished.");
     }
 
     /*

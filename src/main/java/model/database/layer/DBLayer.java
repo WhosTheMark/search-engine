@@ -33,10 +33,28 @@ public class DBLayer {
 
     private static final String DELETE_STMT = "DELETE FROM ?";
 
+    private static final String INDEX_INSERT = "INSERT INTO " + INDEX_TABLE + " VALUES (?,?,?);";
+    private static final String TF_IDF_INDEX_INSERT = "INSERT INTO " + INDEX_TF_IDF_TABLE + " VALUES (?,?,?);";
+
+    // For efficiency store the most used prepared statements.
+    private PreparedStatement storeWordPrepStmt;
+    private PreparedStatement checkWordPrepStmt;
+    private PreparedStatement tfPrepStmt;
+    private PreparedStatement tfIdfPrepStmt;
+
     private Connection connection;
 
     public DBLayer() {
         connection = ConnectionBuilder.getConnection();
+
+        try {
+            storeWordPrepStmt = connection.prepareStatement(INSERT_WORD);
+            checkWordPrepStmt = connection.prepareStatement(SELECT_WORD);
+            tfPrepStmt = connection.prepareStatement(INDEX_INSERT);
+            tfIdfPrepStmt = connection.prepareStatement(TF_IDF_INDEX_INSERT);
+        } catch (SQLException e) {
+            LOGGER.error("Could not create prepared statements.",e);
+        }
     }
 
     /*
@@ -86,9 +104,8 @@ public class DBLayer {
      */
     private boolean wordExists(String word) throws SQLException {
 
-        PreparedStatement prepstmt = connection.prepareStatement(SELECT_WORD);
-        prepstmt.setString(1, word);
-        ResultSet rs = prepstmt.executeQuery();
+        checkWordPrepStmt.setString(1, word);
+        ResultSet rs = checkWordPrepStmt.executeQuery();
 
         return rs.next();
     }
@@ -102,15 +119,12 @@ public class DBLayer {
 
             if (!wordExists(word)) {
 
-                PreparedStatement prepstmt = connection
-                        .prepareStatement(INSERT_WORD);
-                prepstmt.setString(1, word);
-                prepstmt.executeUpdate();
-
+                storeWordPrepStmt.setString(1, word);
+                storeWordPrepStmt.executeUpdate();
             }
 
         } catch (SQLException e) {
-            LOGGER.warn("Could not store word \"{}\" in the database, "
+            LOGGER.debug("Could not store word \"{}\" in the database, "
                     + "other thread might have stored it.", word);
         }
     }
@@ -120,25 +134,21 @@ public class DBLayer {
      */
     public void storeInverseTfEntry(String word, int document, float weight) {
 
-        storeInverseEntry(word, document, weight, INDEX_TABLE);
+        storeInverseEntry(word, document, weight, tfPrepStmt);
     }
 
     public void storeInverseTfIdfEntry(String word, int document, float weight) {
-        storeInverseEntry(word, document, weight, INDEX_TF_IDF_TABLE);
+        storeInverseEntry(word, document, weight, tfIdfPrepStmt);
     }
 
     private void storeInverseEntry(String word, int document,
-            float weight, String table) {
-
-        String strStmt = "INSERT INTO " + table + " VALUES (?,?,?);";
+            float weight, PreparedStatement prepStmt) {
 
         try {
-
-            PreparedStatement prepstmt = connection.prepareStatement(strStmt);
-            prepstmt.setString(1, word);
-            prepstmt.setInt(2, document);
-            prepstmt.setFloat(3, weight);
-            prepstmt.execute();
+            prepStmt.setString(1, word);
+            prepStmt.setInt(2, document);
+            prepStmt.setFloat(3, weight);
+            prepStmt.execute();
 
         } catch (SQLException e) {
             LOGGER.error("Could not store index in the database.",e);

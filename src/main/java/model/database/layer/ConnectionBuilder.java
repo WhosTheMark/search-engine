@@ -30,10 +30,10 @@ public class ConnectionBuilder {
             return null;
         }
 
-        Connection conexion;
+        Connection connection;
 
         try {
-            conexion = DriverManager.getConnection(URL, USER, PASS);
+            connection = DriverManager.getConnection(URL, USER, PASS);
 
         } catch (SQLException e) {
 
@@ -41,7 +41,7 @@ public class ConnectionBuilder {
             return null;
         }
 
-        return conexion;
+        return connection;
     }
 
     private static boolean jdbcDriverExist() {
