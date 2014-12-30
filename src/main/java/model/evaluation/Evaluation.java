@@ -1,30 +1,59 @@
 package model.evaluation;
 
-import java.util.List;
+import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+/**
+ * Class to store the information of an evaluation.
+ */
 public class Evaluation {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final int MAX_PRECISION = 25;
+
+    // Set that contains the list of relevant documents in the qrel file.
+    private Set<String> relevantDocs;
+
     private float precision5 = 0;
     private float precision10 = 0;
     private float precision25 = 0;
     private int totalDocsFound = 0;
     private int relevantDocsFound = 0;
 
-    public Evaluation(){
+    /**
+     * Creates a new Evaluation.
+     */
+    public Evaluation() {
+        totalDocsFound = MAX_PRECISION;
+        relevantDocsFound = MAX_PRECISION;
     }
 
+    /**
+     * Creates a new Evaluation using the set of relevant documents.
+     * @param relevantDocs the set of relevant documents.
+     */
+    public Evaluation(Set<String> relevantDocs){
+        this.relevantDocs = relevantDocs;
+    }
+
+    /**
+     * Gets the precision using the first five documents.
+     * @return the value of the precision.
+     */
     public float getPrecision5() {
         return precision5;
     }
 
+    /**
+     * Gets the precision using the first ten documents.
+     * @return the value of the precision.
+     */
     public float getPrecision10() {
         return precision10;
     }
 
+    /**
+     * Gets the precision using the first 25 documents.
+     * @return the value of the precision.
+     */
     public float getPrecision25() {
         return precision25;
     }
@@ -41,26 +70,24 @@ public class Evaluation {
         this.precision25 = precision25;
     }
 
-    /*
-     * Document found is a relevant doc
+    /**
+     * Checks if the document is relevant or not and updates precisions.
+     * @param document to check.
      */
-    public void foundRelevantDoc(){
+    public void checkDocument(String document){
 
-        LOGGER.entry();
         ++totalDocsFound;
-        ++relevantDocsFound;
+
+        if(relevantDocs.contains(document)){
+            ++relevantDocsFound;
+        }
+
         updatePrecision();
-        LOGGER.exit();
     }
 
-    public void foundNotRelevantDoc(){
-
-        LOGGER.entry();
-        ++totalDocsFound;
-        updatePrecision();
-        LOGGER.exit();
-    }
-
+    /**
+     * Updates the values of the precisions if needed.
+     */
     private void updatePrecision() {
 
         switch(totalDocsFound){
@@ -75,46 +102,6 @@ public class Evaluation {
             precision25 = (float)relevantDocsFound / (float)totalDocsFound;
             break;
         }
-    }
-
-    public static Evaluation calculateAverage(List<Evaluation> list){
-
-        LOGGER.entry(list);
-        Evaluation evaluation = new Evaluation();
-        sumPrecisions(evaluation, list);
-        divideByTotal(evaluation, list);
-
-        return LOGGER.exit(evaluation);
-    }
-
-    private static void sumPrecisions(Evaluation evaluation,
-            List<Evaluation> list) {
-
-        LOGGER.entry(evaluation,list);
-
-        for(Evaluation eval: list){
-            evaluation.precision5 += eval.getPrecision5();
-            evaluation.precision10 += eval.getPrecision10();
-            evaluation.precision25 += eval.getPrecision25();
-        }
-
-        LOGGER.exit();
-    }
-
-    private static void divideByTotal(Evaluation evaluation,
-            List<Evaluation> list) {
-
-        LOGGER.entry(evaluation,list);
-
-        int total = list.size();
-
-        if(total != 0) {
-            evaluation.precision5 = evaluation.precision5 / (float)total;
-            evaluation.precision10 = evaluation.precision10 / (float)total;
-            evaluation.precision25 = evaluation.precision25 / (float)total;
-        }
-
-        LOGGER.exit();
     }
 
     public String toString(){

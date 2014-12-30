@@ -16,13 +16,13 @@ public class DBLayer {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    //Names of tables
+    // Names of tables
     private static final String WORD_TABLE = "word";
     private static final String INDEX_TABLE = "indx";
     private static final String INDEX_TF_IDF_TABLE = "tf_idf_index";
     private static final String DOC_TABLE = "document";
 
-    //Queries
+    // Queries
     private static final String INSERT_DOC = "INSERT INTO " + DOC_TABLE + " VALUES (?,?);";
     private static final String SELECT_NUMBER_OF_DOCS = "SELECT COUNT(*) " +
                                                         "FROM " + DOC_TABLE + ";";
@@ -42,8 +42,13 @@ public class DBLayer {
     private PreparedStatement tfPrepStmt;
     private PreparedStatement tfIdfPrepStmt;
 
+    // Connection to the database.
     private Connection connection;
 
+    /**
+     * Establishes a connection to the database and builds the most used
+     * prepared statements for efficiency.
+     */
     public DBLayer() {
         connection = ConnectionBuilder.getConnection();
 
@@ -57,8 +62,11 @@ public class DBLayer {
         }
     }
 
-    /*
-     * Store a document in the database.
+    /**
+     * Stores the name of the document in the database.
+     * @param idDocument ID of the document to store
+     * @param documentName name of the document to store.
+     * @return true if the document was stored.
      */
     public boolean storeDocument(int idDocument, String documentName) {
 
@@ -79,14 +87,17 @@ public class DBLayer {
         return true;
     }
 
+    /**
+     * Gets the number of documents in the database.
+     * @return the number of documents.
+     */
     public int getNumberOfDocuments(){
 
         LOGGER.trace("Getting the number of docs");
 
-        ResultSet rs;
         try {
             PreparedStatement prepstmt = connection.prepareStatement(SELECT_NUMBER_OF_DOCS);
-            rs = prepstmt.executeQuery();
+            ResultSet rs = prepstmt.executeQuery();
 
             if(!rs.next()){
                 return 0;
@@ -99,8 +110,10 @@ public class DBLayer {
             return -1;
         }
     }
-    /*
-     * Checks if a wordExists in the database.
+
+    /**
+     * Checks if a word exists in the database.
+     * @param word the word to check.
      */
     private boolean wordExists(String word) throws SQLException {
 
@@ -110,8 +123,9 @@ public class DBLayer {
         return rs.next();
     }
 
-    /*
-     * Store a word in the database.
+    /**
+     * Stores a word in the database if it does not exist.
+     * @param word the word to store.
      */
     public void storeWord(String word) {
 
@@ -129,18 +143,33 @@ public class DBLayer {
         }
     }
 
-    /*
-     * Store an entry of the inverse file in the database.
+    /**
+     * Stores a word of a document using tf weight.
+     * @param word word to store.
+     * @param document document associated to the word.
+     * @param weight weight associated to the word.
      */
     public void storeInverseTfEntry(String word, int document, float weight) {
-
         storeInverseEntry(word, document, weight, tfPrepStmt);
     }
 
+    /**
+     * Stores a word of a document using tf-idf weight.
+     * @param word word to store.
+     * @param document document associated to the word.
+     * @param weight weight associated to the word.
+     */
     public void storeInverseTfIdfEntry(String word, int document, float weight) {
         storeInverseEntry(word, document, weight, tfIdfPrepStmt);
     }
 
+    /**
+     * Stores a word of a document using some weight.
+     * @param word word to store.
+     * @param document document associated to the word.
+     * @param weight weight associated to the word.
+     * @param prepStmt the table it is going to insert the word.
+     */
     private void storeInverseEntry(String word, int document,
             float weight, PreparedStatement prepStmt) {
 
@@ -155,26 +184,37 @@ public class DBLayer {
         }
     }
 
-    /*
-     * Returns the list of relevant document of a word using Term Frequency.
+    /**
+     * Gets the list of relevant documents with tf weights associated to a word.
+     * @param word searches in the database documents containing this String.
+     * @return the list of relevant documents with tf weights associated.
+     * @see RelevantDocument
      */
     public List<RelevantDocument> getRelevantDocsTf(String word) {
 
         LOGGER.trace("Getting relevant documents of the word {} using tf.", word);
-
         return getRelevantDocs(word,INDEX_TABLE);
     }
 
-    /*
-     * Returns the list of relevant document of a word using tf-idf.
+    /**
+     * Gets the list of relevant documents with tf-idf weights associated to a word.
+     * @param word searches in the database documents containing this String.
+     * @return the list of relevant documents with tf-idf weights associated.
+     * @see RelevantDocument
      */
     public List<RelevantDocument> getRelevantDocsTfIdf(String word) {
 
         LOGGER.trace("Getting relevant documents of the word {} using tf-idf.", word);
-
         return getRelevantDocs(word,INDEX_TF_IDF_TABLE);
     }
 
+    /**
+     * Gets the list of relevant documents associated to a word.
+     * @param word searches in the database documents containing this String.
+     * @param table where the documents will be found.
+     * @return the list of relevant documents n the table.
+     * @see RelevantDocument
+     */
     private List<RelevantDocument> getRelevantDocs(String word, String table) {
 
         String strQuery = "SELECT * FROM " + table + " , " + DOC_TABLE
@@ -198,8 +238,12 @@ public class DBLayer {
         return list;
     }
 
-    /*
-     * Builds relevant document list using a result set.
+    /**
+     * Builds a list of relevant documents using a ResultSet;
+     * @param rs the ResultSet to build the list from.
+     * @return the list of relevant documents built.
+     * @throws SQLException if there is a problem with the ResultSet.
+     * @see RelevantDocument
      */
     private List<RelevantDocument> buildRelevantDocList(ResultSet rs)
             throws SQLException{
@@ -220,8 +264,8 @@ public class DBLayer {
         return list;
     }
 
-    /*
-     * Deletes the information of the tables in the database.
+    /**
+     * Deletes the information in the database.
      */
     public void eraseDB() {
 
@@ -245,6 +289,9 @@ public class DBLayer {
 
     }
 
+    /**
+     * Closes the connection of the database.
+     */
     public void finalize(){
 
         try {

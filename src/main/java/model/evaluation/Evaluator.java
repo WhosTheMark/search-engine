@@ -2,10 +2,8 @@ package model.evaluation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.Set;
@@ -13,32 +11,22 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Class that evaluates the results of the search.
+ * @see Evaluation
+ */
 public class Evaluator {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String DOC_NAME = "D[0-9]+\\.html";
-    private static final int MAX_PRECISION = 25;
 
-    // Stores the queries that have already been evaluated.
-    private List<Evaluation> queriesEvaluations;
-
-    public Evaluator(){
-        this.queriesEvaluations = new ArrayList<Evaluation>();
-    }
-
-    public List<Evaluation> getQueriesEvaluations() {
-        return queriesEvaluations;
-    }
-
-    public Evaluation calculateFinalEvaluation(){
-
-        return Evaluation.calculateAverage(queriesEvaluations);
-    }
+    // Avoid instantiation.
+    private Evaluator(){}
 
     /*
      * Evaluate the results using predetermined qrel files.
      */
-    public void evaluate(File qrelsFolder, File resultFolder){
+    public static EvaluationReport evaluate(File qrelsFolder, File resultFolder){
 
         LOGGER.entry(qrelsFolder, resultFolder);
 
@@ -50,22 +38,22 @@ public class Evaluator {
             resultFiles = listFiles(resultFolder);
         } catch (FileNotFoundException e) {
             LOGGER.error("Some of the folders to compare do not exist", e);
-            return;
+            return new EvaluationReport();
         }
 
         Arrays.sort(qrelFiles);
         Arrays.sort(resultFiles);
 
-        compareResults(qrelFiles, resultFiles);
+        EvaluationReport report = compareResults(qrelFiles, resultFiles);
 
-        LOGGER.exit();
+        return LOGGER.exit(report);
 
     }
 
     /*
      * Compare the results of all queries using predetermined qrel files.
      */
-    private void compareResults(File[] qrelFiles, File[] resultFiles) {
+    private static EvaluationReport compareResults(File[] qrelFiles, File[] resultFiles) {
 
         LOGGER.entry(qrelFiles,resultFiles);
 
@@ -76,20 +64,22 @@ public class Evaluator {
             LOGGER.warn("The number of files in the folders are different!");
         }
 
+        EvaluationReport report = new EvaluationReport();
+
         for (int i = 0; i < qrelsLen && i < resultLen; ++i){
 
             Set<String> relevantDocSet = getRelevantDocSet(qrelFiles[i]);
             Evaluation eval = evaluateQueryResult(relevantDocSet,resultFiles[i]);
-            this.queriesEvaluations.add(eval);
+            report.addEvaluation(eval);
         }
 
-        LOGGER.exit();
+        return LOGGER.exit(report);
     }
 
     /*
      * Evaluate a single query
      */
-    private Evaluation evaluateQueryResult(Set<String> relevantDocSet, File result) {
+    private static Evaluation evaluateQueryResult(Set<String> relevantDocSet, File result) {
 
         LOGGER.entry(relevantDocSet,result);
 
@@ -109,21 +99,17 @@ public class Evaluator {
      * Calculates an evaluation using the set of relevant documents
      * and the result file.
      */
-    private Evaluation calculateEvaluation(Set<String> relevantDocSet,
+    private static Evaluation calculateEvaluation(Set<String> relevantDocSet,
             Scanner scanner) {
 
         LOGGER.entry(relevantDocSet,scanner);
 
-        Evaluation eval = new Evaluation();
+        Evaluation eval = new Evaluation(relevantDocSet);
         int i = 0;
 
-        while (scanner.hasNext(DOC_NAME) && i < MAX_PRECISION) {
+        while (scanner.hasNext(DOC_NAME) && i < Evaluation.MAX_PRECISION) {
             String doc = scanner.next(DOC_NAME);
-            if(relevantDocSet.contains(doc)){
-                eval.foundRelevantDoc();
-            } else {
-                eval.foundNotRelevantDoc();
-            }
+            eval.checkDocument(doc);
             ++i;
         }
 

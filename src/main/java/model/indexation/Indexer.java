@@ -15,7 +15,7 @@ public class Indexer {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final String SEPARATOR_REGEXP = "[^A-Za-z0-9éàèùâêîôûëïüÿçœæ]+";
     private static final int WORD_MAX_LENGTH = 7;
-    private static final int THREADS_NUM = 20;
+    private static final int THREADS_NUM = 10;
 
     // To avoid instantiation
     private Indexer() {
