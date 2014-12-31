@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Creates the connection of the database.
  */
-public class ConnectionBuilder {
+class ConnectionBuilder {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final String DB_DRIVER = "org.postgresql.Driver";

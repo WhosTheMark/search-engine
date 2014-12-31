@@ -23,8 +23,13 @@ public class Evaluator {
     // Avoid instantiation.
     private Evaluator(){}
 
-    /*
-     * Evaluate the results using predetermined qrel files.
+    /**
+     * Evaluates the result of the search.
+     * @param qrelsFolder folder with the qrel files.
+     * @param resultFolder folder with the results of the search.
+     * @return a report with an EvaluationReport object with the evaluations of
+     * all queries and the average.
+     * @see EvaluationReport
      */
     public static EvaluationReport evaluate(File qrelsFolder, File resultFolder){
 
@@ -50,8 +55,12 @@ public class Evaluator {
 
     }
 
-    /*
-     * Compare the results of all queries using predetermined qrel files.
+    /**
+     * Compares the files in the qrel folder with the results.
+     * @param qrelFiles qrel files with the relevant and non-relevant documents.
+     * @param resultFiles files with the results of the search.
+     * @return a report with an EvaluationReport object with the evaluations of
+     * all queries and the average.
      */
     private static EvaluationReport compareResults(File[] qrelFiles, File[] resultFiles) {
 
@@ -68,7 +77,7 @@ public class Evaluator {
 
         for (int i = 0; i < qrelsLen && i < resultLen; ++i){
 
-            Set<String> relevantDocSet = getRelevantDocSet(qrelFiles[i]);
+            Set<String> relevantDocSet = buildRelevantDocSet(qrelFiles[i]);
             Evaluation eval = evaluateQueryResult(relevantDocSet,resultFiles[i]);
             report.addEvaluation(eval);
         }
@@ -76,8 +85,11 @@ public class Evaluator {
         return LOGGER.exit(report);
     }
 
-    /*
-     * Evaluate a single query
+    /**
+     * Evaluates the result of a single query.
+     * @param relevantDocSet the set of relevant documents for this query.
+     * @param result the file with the documents found by the engine.
+     * @return the Evaluation of the result of the query.
      */
     private static Evaluation evaluateQueryResult(Set<String> relevantDocSet, File result) {
 
@@ -95,9 +107,11 @@ public class Evaluator {
         return calculateEvaluation(relevantDocSet, scanner);
     }
 
-    /*
-     * Calculates an evaluation using the set of relevant documents
-     * and the result file.
+    /**
+     * Reads the lines of the result file to calculate the evaluation.
+     * @param relevantDocSet the set of relevant documents for this query.
+     * @param scanner to read the lines of the file.
+     * @return the Evaluation of the result of the query.
      */
     private static Evaluation calculateEvaluation(Set<String> relevantDocSet,
             Scanner scanner) {
@@ -116,10 +130,12 @@ public class Evaluator {
         return LOGGER.exit(eval);
     }
 
-    /*
-     * Get the relevant docs in the qrel.
+    /**
+     * Builds the set containing the relevant documents of a qrel file.
+     * @param qrel the file used to build the set.
+     * @return the set with the name of the relevant documents.
      */
-    private static Set<String> getRelevantDocSet(File qrel){
+    private static Set<String> buildRelevantDocSet(File qrel){
 
         LOGGER.entry(qrel);
 
@@ -139,8 +155,10 @@ public class Evaluator {
         return LOGGER.exit(set);
     }
 
-    /*
-     * Add a relevant doc to the set.
+    /**
+     * Adds documents to the set.
+     * @param scanner the text scanner of the result file.
+     * @param set set with the name of the relevant documents.
      */
     private static void addDocs(Scanner scanner, Set<String> set) {
 
@@ -158,6 +176,12 @@ public class Evaluator {
         LOGGER.exit();
     }
 
+    /**
+     * Lists the files in a folder.
+     * @param folder used to list the files.
+     * @return An array with the files found.
+     * @throws FileNotFoundException if the folder is not found.
+     */
     private static File[] listFiles(File folder) throws FileNotFoundException{
 
         LOGGER.entry(folder);

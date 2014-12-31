@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.indexation.Indexer;
+import model.indexation.WordNormalizer;
 import model.sparql.SparqlAccessor;
 
 public class QueryEnhancer {
@@ -51,7 +51,7 @@ public class QueryEnhancer {
 
         for (String label: labels) {
 
-            String[] normalizedLabels = label.split(Indexer.SEPARATOR_REGEXP);
+            String[] normalizedLabels = WordNormalizer.split(label);
 
             for (String normLabel : normalizedLabels){
                 list.add(normLabel);

@@ -6,32 +6,45 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Class to handle the evaluations made by the evaluator.
+ * It stores the evaluations made in a list and can calculates the average of all
+ * the evaluations.
+ */
 public class EvaluationReport {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
     private List<Evaluation> queriesEvaluations;
-    private Evaluation finalEvaluation;
 
-    public EvaluationReport(){
+    /**
+     * Creates a new Evaluation Report
+     */
+    EvaluationReport(){
         queriesEvaluations = new ArrayList<Evaluation>();
     }
 
+    /**
+     * Gets the list of evaluations already made.
+     * @return the list of evaluations already made.
+     */
     public List<Evaluation> getQueriesEvaluations() {
         return queriesEvaluations;
     }
 
+    /**
+     * Gets the evaluation with the average of the evaluations made.
+     * @return an evaluation with the average.
+     */
     public Evaluation getFinalEvaluation() {
-
-        if (finalEvaluation == null) {
-            finalEvaluation = calculateAverage();
-        }
-
-        return finalEvaluation;
-
+        return calculateAverage();
     }
 
-    public void addEvaluation(Evaluation eval) {
+    /**
+     * Adds an evaluation to the list of evaluations.
+     * @param eval the Evaluation to add.
+     */
+    void addEvaluation(Evaluation eval) {
         queriesEvaluations.add(eval);
     }
 
@@ -60,9 +73,9 @@ public class EvaluationReport {
         LOGGER.entry(evaluation);
 
         for(Evaluation eval: queriesEvaluations){
-            evaluation.setPrecision5(evaluation.getPrecision5() + eval.getPrecision5());
-            evaluation.setPrecision10(evaluation.getPrecision10() + eval.getPrecision10());
-            evaluation.setPrecision25(evaluation.getPrecision25() + eval.getPrecision25());
+            evaluation.precision5 += eval.precision5;
+            evaluation.precision10 += eval.precision10;
+            evaluation.precision25 += eval.precision25;
         }
 
         LOGGER.exit();
@@ -80,9 +93,9 @@ public class EvaluationReport {
         int total = queriesEvaluations.size();
 
         if(total != 0) {
-            evaluation.setPrecision5(evaluation.getPrecision5() / (float)total);
-            evaluation.setPrecision10(evaluation.getPrecision10() / (float)total);
-            evaluation.setPrecision25(evaluation.getPrecision25() / (float)total);
+            evaluation.precision5 /= (float)total;
+            evaluation.precision10 /= (float)total;
+            evaluation.precision25 /= (float)total;
         }
 
         LOGGER.exit();

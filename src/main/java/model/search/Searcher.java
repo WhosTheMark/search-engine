@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import model.database.DAO.RelevantDocumentDAO;
-import model.indexation.Indexer;
+import model.indexation.WordNormalizer;
 import model.search.calculators.RelevanceCalculator;
 
 /*
@@ -44,7 +44,7 @@ public class Searcher {
 
         LOGGER.entry(query);
 
-        String[] keywords = query.split(Indexer.SEPARATOR_REGEXP);
+        String[] keywords = WordNormalizer.split(query);
         return executeQuery(keywords);
     }
 
@@ -75,7 +75,7 @@ public class Searcher {
         LOGGER.debug("Calculating relevant documents for the keyword {}.",
                 keyword);
 
-        String normalizedKeyword = Indexer.normalizeWord(keyword);
+        String normalizedKeyword = WordNormalizer.normalize(keyword);
 
         return relvDocDAO.getRelevantDocs(normalizedKeyword);
     }

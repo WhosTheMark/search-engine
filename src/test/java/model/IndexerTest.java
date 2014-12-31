@@ -16,7 +16,7 @@ public class IndexerTest {
         File folder = new File("extra/CORPUS");
         File stopWordsfile = new File("extra/stopliste.txt");
 
-        Indexer.startIndexation(stopWordsfile, folder);
+        Indexer.startIndexation(folder, stopWordsfile);
 
         long end = System.currentTimeMillis();
 

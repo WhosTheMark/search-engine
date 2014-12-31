@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.indexation.Indexer;
+import model.indexation.WordNormalizer;
 import model.search.calculators.RelevanceCalculator;
 
 public class EnhancedSearcher extends Searcher {
@@ -32,7 +32,7 @@ public class EnhancedSearcher extends Searcher {
         List<WeightedKeyword> weigthedKeywords = new ArrayList<WeightedKeyword>();
         setWeights(weigthedKeywords, enhancerWords, ENHANCED_WEIGHT);
 
-        String[] keywords = query.split(Indexer.SEPARATOR_REGEXP);
+        String[] keywords = WordNormalizer.split(query);
         setWeights(weigthedKeywords,Arrays.asList(keywords), DEFAULT_WEIGHT);
 
         return executeQuery(weigthedKeywords);

@@ -12,25 +12,26 @@ public class Evaluation {
     // Set that contains the list of relevant documents in the qrel file.
     private Set<String> relevantDocs;
 
-    private float precision5 = 0;
-    private float precision10 = 0;
-    private float precision25 = 0;
+    float precision5 = 0;
+    float precision10 = 0;
+    float precision25 = 0;
     private int totalDocsFound = 0;
     private int relevantDocsFound = 0;
 
     /**
      * Creates a new Evaluation.
+     * Assigns MAX_PRECISION to avoid any update of the fields by using check 
+     * documents.
      */
-    public Evaluation() {
+    Evaluation() {
         totalDocsFound = MAX_PRECISION;
-        relevantDocsFound = MAX_PRECISION;
     }
 
     /**
      * Creates a new Evaluation using the set of relevant documents.
      * @param relevantDocs the set of relevant documents.
      */
-    public Evaluation(Set<String> relevantDocs){
+    Evaluation(Set<String> relevantDocs){
         this.relevantDocs = relevantDocs;
     }
 
@@ -58,23 +59,11 @@ public class Evaluation {
         return precision25;
     }
 
-    public void setPrecision5(float precision5) {
-        this.precision5 = precision5;
-    }
-
-    public void setPrecision10(float precision10) {
-        this.precision10 = precision10;
-    }
-
-    public void setPrecision25(float precision25) {
-        this.precision25 = precision25;
-    }
-
     /**
      * Checks if the document is relevant or not and updates precisions.
      * @param document to check.
      */
-    public void checkDocument(String document){
+    void checkDocument(String document){
 
         ++totalDocsFound;
 
