@@ -14,7 +14,7 @@ public class SparqlAccessorTest {
     @Test
     public void test() {
 
-        SparqlAccessor sparqlDAO = new SparqlAccessor();
+        SparqlDAO sparqlDAO = new SparqlDAO();
         List<String> list = sparqlDAO.getOtherLabels(LABEL_1);
         Collections.sort(list);
         String[] result = new String[list.size()];

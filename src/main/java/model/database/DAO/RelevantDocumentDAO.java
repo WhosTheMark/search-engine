@@ -69,7 +69,7 @@ public class RelevantDocumentDAO {
         double idf = Math.log((float) (numDocs) / (float)(1 + list.size()));
 
         for(RelevantDocument doc : list){
-            doc.setWeight((float) (doc.getWeight() * idf));
+            doc.setRelevance((float) (doc.getRelevance() * idf));
         }
         return LOGGER.exit(list);
     }
@@ -80,7 +80,7 @@ public class RelevantDocumentDAO {
     private void storeTfIdf(String keyword, List<RelevantDocument> list) {
 
         for(RelevantDocument doc : list){
-            sqlDAL.storeInverseTfIdfEntry(keyword,doc.getDocumentId(),doc.getWeight());
+            sqlDAL.storeInverseTfIdfEntry(keyword,doc.getDocumentId(),doc.getRelevance());
         }
     }
 

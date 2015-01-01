@@ -50,12 +50,12 @@ public class InnerProductCalculator extends RelevanceCalculator {
                 ++i;
 
             } else if (elem1.getDocumentId() > elem2.getDocumentId()) {
-                elem2.setWeight(weight * elem2.getWeight());
+                elem2.setRelevance(weight * elem2.getRelevance());
                 result.add(elem2);
                 ++j;
 
             } else {
-                elem1.setWeight(elem1.getWeight() +  weight * elem2.getWeight());
+                elem1.setRelevance(elem1.getRelevance() +  weight * elem2.getRelevance());
                 result.add(elem1);
                 ++i;
                 ++j;
@@ -77,7 +77,7 @@ public class InnerProductCalculator extends RelevanceCalculator {
 
         for (; index < list.size(); ++index) {
             RelevantDocument elem = list.get(index);
-            elem.setWeight(weight * elem.getWeight());
+            elem.setRelevance(weight * elem.getRelevance());
             result.add(elem);
         }
     }

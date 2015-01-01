@@ -8,19 +8,31 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import model.indexation.WordNormalizer;
-import model.sparql.SparqlAccessor;
+import model.sparql.SparqlDAO;
 
-public class QueryEnhancer {
+/**
+ * Class that takes a query and will look in a SPARQL database related words
+ * to enhance the original query. At the moment it only looks for synonymous.
+ */
+class QueryEnhancer {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private SparqlAccessor sparqlDAO;
+    private SparqlDAO sparqlDAO;
     private static final String SEPARATOR_REGEXP = ",";
 
-    public QueryEnhancer(){
-        sparqlDAO =  new SparqlAccessor();
+    /**
+     * Creates a new enhancer and connects to the SPARQL database.
+     */
+    QueryEnhancer(){
+        sparqlDAO =  new SparqlDAO();
     }
 
-    public List<String> enhanceQuery(String query){
+    /**
+     * Takes a query and looks for related words in the SPARQL database.
+     * @param query the query to enhance.
+     * @return the list of words found.
+     */
+    List<String> enhanceQuery(String query){
 
         LOGGER.info("Procesing original query: {}.", query);
 
@@ -28,7 +40,12 @@ public class QueryEnhancer {
         return enhanceQuery(terms);
     }
 
-    public List<String> enhanceQuery(String[] terms){
+    /**
+     * Takes an array of strings and looks for related words in the SPARQL database.
+     * @param terms array of strings
+     * @return the list of words found.
+     */
+    List<String> enhanceQuery(String[] terms){
 
         LOGGER.entry(Arrays.toString(terms));
 
@@ -45,6 +62,11 @@ public class QueryEnhancer {
         return list;
     }
 
+    /**
+     * Adds the synonymous to the list.
+     * @param labels the list of synonymous found.
+     * @param list the list where the labels will be added.
+     */
     private void addLabelsToList(List<String> labels, List<String> list) {
 
         LOGGER.entry(labels,list);

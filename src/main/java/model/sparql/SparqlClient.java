@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/*
+/**
  * Class to establish the connection to the fuseki server.
  * To better understand the format of the responses, you
  * can check the documentation here:
@@ -45,16 +45,27 @@ public class SparqlClient {
     // Default query to know if server is up
     private final String ASK_QUERY = "ASK WHERE { ?s ?p ?o }";
 
+    /**
+     * Creates a client using the address of the server.
+     * @param endpointUri the address of the server.
+     */
     public SparqlClient(String endpointUri) {
         this.endpointUri = endpointUri;
     }
 
+    /**
+     * Checks if the server is up.
+     * @return true if it can establish a connection.
+     */
     public boolean isServerUp(){
         return ask(ASK_QUERY);
     }
 
-    /*
-     * Run a SPARQL select on the server
+    /**
+     * Runs a SPARQL select on the server.
+     * @param queryString the select to be ran.
+     * @return the result of the query.
+     * @see SparqlResult
      */
     public SparqlResult select(String queryString) {
 
@@ -66,9 +77,12 @@ public class SparqlClient {
     }
 
 
-    /*
-     * Store the information of the XML result nodes in a SPARQL
+    /**
+     * Stores the information of the XML result nodes in a SPARQL
      * result structure.
+     * @param resultNodes the XML nodes.
+     * @return the result of the query.
+     * @see SparqlResult
      */
     private SparqlResult getResults(NodeList resultNodes) {
 
@@ -83,8 +97,11 @@ public class SparqlClient {
         return results;
     }
 
-    /*
-     * Take a Result node and bind the values.
+    /**
+     * Takes an XML Result node and bind the values of the variables of the query.
+     * @param resultNode the XML Node where one result is stored.
+     * @param results where all the result will be stored.
+     * @see SparqlResult
      */
     private void getBindings(Node resultNode, SparqlResult results) {
 
@@ -94,14 +111,16 @@ public class SparqlClient {
         for (int i = 0; i < bindingNodes.getLength(); ++i) {
 
             Node bindingNode = bindingNodes.item(i);
-            bindValue(results, bindingNode);
+            bindValue(bindingNode, results);
         }
     }
 
-    /*
-     * Bind a single value.
+    /**
+     * Binds a single value to a single variable of the query.
+     * @param bindingNode an XML node with the binding of the variable.
+     * @param results where all the result will be stored.
      */
-    private void bindValue(SparqlResult results, Node bindingNode) {
+    private void bindValue(Node bindingNode, SparqlResult results) {
 
         // To avoid text nodes
         if (notTextNode(bindingNode)) {
@@ -114,8 +133,10 @@ public class SparqlClient {
         }
     }
 
-    /*
-     * Get the value from the XML node.
+    /**
+     * Gets the value from the XML node to bind it to a variable.
+     * @param The XML node with the value to bind.
+     * @return the value inside the Node.
      */
     private String getValue(Node bindingNode) {
 
@@ -134,17 +155,18 @@ public class SparqlClient {
         return "";
     }
 
-    /*
-     * To check if a node is not a Text Node.
-     * The parser takes into account the spaces outside the tags,
-     * we can avoid them using this.
+    /**
+     * Used to check if a node is not a Text Node. The parser takes into account
+     * the spaces outside the tags, they can be avoided them using this method.
      */
     private boolean notTextNode(Node bindingNode) {
         return bindingNode.getNodeType() == Node.ELEMENT_NODE;
     }
 
-    /*
-     * Run a SPARQL ask on the remote server
+    /**
+     * Runs a SPARQL ask query on the server.
+     * @param queryString the query to run.
+     * @return the result of the ask.
      */
     public boolean ask(String queryString) {
 
@@ -157,9 +179,11 @@ public class SparqlClient {
         return xmlNode != null && xmlNode.getTextContent().equals("true");
     }
 
-    /*
+    /**
      * Connects to the server using the query and stores the reply in an XML
      * Document.
+     * @param queryString the query to be executed.
+     * @return an XML Document.
      */
     private Document getXMLFromServer(String queryString) {
 
@@ -182,8 +206,9 @@ public class SparqlClient {
         return newEmptyDocument();
     }
 
-    /*
-     * Builds the URI to send queries to the server.
+    /**
+     * Builds the HTTP request to send a query to the server.
+     * @param queryString the query to send.
      */
     private URI buildHTTPRequest(String queryString) throws URISyntaxException {
 
@@ -197,12 +222,13 @@ public class SparqlClient {
         return uri;
     }
 
-    /*
-     * Run a SPARQL update on the remote server.
+    /**
+     * Runs a SPARQL update on the remote server.
+     * @param queryString the query with the update.
      */
     public void update(String queryString) {
-        try {
 
+        try {
             DefaultHttpClient httpClient = new DefaultHttpClient();
             HttpPost request = buildPostRequest(queryString);
             HttpResponse response = httpClient.execute(request);
@@ -219,8 +245,10 @@ public class SparqlClient {
         }
     }
 
-    /*
-     * Builds post request to send updates to the server.
+    /**
+     * Builds a post request to send updates to the server.
+     * @param queryString the query with the update.
+     * @return an HTTPPost object with the request.
      */
     private HttpPost buildPostRequest(String queryString)
             throws UnsupportedEncodingException {
@@ -236,6 +264,11 @@ public class SparqlClient {
         return httpPost;
     }
 
+    /**
+     * Creates an Empty XML Document. It is used in case an XML file could not
+     * be retrieved from the server.
+     * @return an empty XML document.
+     */
     private static Document newEmptyDocument() {
 
         DocumentBuilderFactory factory = null;

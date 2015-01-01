@@ -6,7 +6,10 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SparqlAccessor {
+/**
+ * Class to implement methods to manipulate the information gotten from the server.
+ */
+public class SparqlDAO {
 
     private static final Logger LOGGER = LogManager.getLogger();
     // Connection to the server.
@@ -17,10 +20,18 @@ public class SparqlAccessor {
 
     private static final String SERVER_ADDRESS = "localhost:3030/ds";
 
-    public SparqlAccessor() {
+    /**
+     * Creates a new data access object and connects to the server.
+     */
+    public SparqlDAO() {
         this.client = new SparqlClient(SERVER_ADDRESS);
     }
 
+    /**
+     * Gets the labels or synonymous of a string.
+     * @param label the string used to search the synonymous.
+     * @return the list of synonymous.
+     */
     public List<String> getOtherLabels(String label){
 
         LOGGER.entry(label);

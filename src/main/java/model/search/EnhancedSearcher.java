@@ -14,14 +14,27 @@ public class EnhancedSearcher extends Searcher {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private QueryEnhancer enhancer;
+
+    //The weight of the words in the original query.
     private static final int DEFAULT_WEIGHT = 5;
+
+    //The weight of the words found in the SPARQL server.
     private static final int ENHANCED_WEIGHT = 1;
 
+    /**
+     * Creates a searcher that will enhance the query using a SPARQL server.
+     * @param calculator the calculator that will be used.
+     * @param resultFolder the folder where the results will be stored.
+     */
     public EnhancedSearcher(RelevanceCalculator calculator, String resultFolder) {
         super(calculator, resultFolder);
         enhancer = new QueryEnhancer();
     }
 
+    /**
+     * {@inheritDoc} It will also enhance the query with new words found in a
+     * SPARQL server and will set different weights to these words.
+     */
     @Override
     protected List<RelevantDocument> executeQuery(String query) {
 
@@ -38,12 +51,19 @@ public class EnhancedSearcher extends Searcher {
         return executeQuery(weigthedKeywords);
     }
 
+    /**
+     * Sets the weights of a list of words.
+     * @param weigthedKeywords the list where the words will be added.
+     * @param words the list of words.
+     * @param weight the weight the words to be added will have.
+     * @see WeightedKeyword
+     */
     private void setWeights(List<WeightedKeyword> weigthedKeywords,
-            List<String> enhancerWords, int weight) {
+            List<String> words, int weight) {
 
-        LOGGER.entry(weigthedKeywords, enhancerWords, weight);
+        LOGGER.entry(weigthedKeywords, words, weight);
 
-        for(String enhancerWord : enhancerWords) {
+        for(String enhancerWord : words) {
             WeightedKeyword wk = new WeightedKeyword(enhancerWord,weight);
             weigthedKeywords.add(wk);
         }
@@ -51,6 +71,12 @@ public class EnhancedSearcher extends Searcher {
         LOGGER.exit();
     }
 
+    /**
+     * Executes a query using the list of weighted words.
+     * @param keywords the list of keywords.
+     * @return the list of relevant documents found.
+     * @see RelevantDocument
+     */
     public List<RelevantDocument> executeQuery(List<WeightedKeyword> keywords){
 
         LOGGER.entry(keywords);
