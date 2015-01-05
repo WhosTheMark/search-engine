@@ -41,14 +41,22 @@ public class EnhancedSearcher extends Searcher {
         LOGGER.debug("Excecuting query {} with enhancement.", query);
 
         List<String> enhancerWords = enhancer.enhanceQuery(query);
+        String[] keywords = WordNormalizer.split(query);
+        removeRepeated(enhancerWords,keywords);
 
         List<WeightedKeyword> weigthedKeywords = new ArrayList<WeightedKeyword>();
+
+        setWeights(weigthedKeywords,Arrays.asList(keywords), DEFAULT_WEIGHT);
         setWeights(weigthedKeywords, enhancerWords, ENHANCED_WEIGHT);
 
-        String[] keywords = WordNormalizer.split(query);
-        setWeights(weigthedKeywords,Arrays.asList(keywords), DEFAULT_WEIGHT);
-
         return executeQuery(weigthedKeywords);
+    }
+
+    private void removeRepeated(List<String> enhancerWords, String[] keywords){
+
+        for(String keyword : keywords){
+            enhancerWords.remove(keyword);
+        }
     }
 
     /**
