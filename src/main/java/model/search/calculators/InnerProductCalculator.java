@@ -8,13 +8,14 @@ import org.apache.logging.log4j.Logger;
 
 import model.search.RelevantDocument;
 
-/*
- * Calculates relevant documents by using inner product.
+/**
+ * Class to calculate the relevance of documents by using inner product.
  */
 public class InnerProductCalculator extends RelevanceCalculator {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
+    //Accumulator
     private List<RelevantDocument> accumDocs;
 
     public InnerProductCalculator(){
@@ -25,10 +26,7 @@ public class InnerProductCalculator extends RelevanceCalculator {
     public void addDocuments(List<RelevantDocument> relevDocs) {
         addDocuments(RelevanceCalculator.DEFAULT_WEIGHT, relevDocs);
     }
-    /*
-     * Calculates the relevance of documents with list of the newly
-     * obtained frequencies.
-     */
+
     @Override
     public void addDocuments(int weight, List<RelevantDocument> relevDocs) {
 
@@ -69,8 +67,9 @@ public class InnerProductCalculator extends RelevanceCalculator {
 
     }
 
-    /*
-     * Add the elements of the list that have not been added.
+    /**
+     * Adds the elements of the list that have not been added. Used when one of
+     * the lists is shorter.
      */
     private void addLastElems(int index, int weight, List<RelevantDocument> list,
             List<RelevantDocument> result){
@@ -82,9 +81,6 @@ public class InnerProductCalculator extends RelevanceCalculator {
         }
     }
 
-    /*
-     * Finalize the calculations.
-     */
     @Override
     public List<RelevantDocument> calculateRelevantDocs() {
         List<RelevantDocument> aux = accumDocs;
