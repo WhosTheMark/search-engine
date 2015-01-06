@@ -1,4 +1,4 @@
-package model.database.DAO;
+package model.database.dao;
 
 import java.util.Map.Entry;
 
@@ -49,8 +49,8 @@ public class InverseFileDAO {
      * Closes the connection of the database.
      * It should be used after all the operations are done.
      */
-    public void finalize() {
-        sqlDAL.finalize();
+    public void closeConnection() {
+        sqlDAL.closeConnection();
         sqlDAL = null;
     }
 }

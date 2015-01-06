@@ -43,7 +43,7 @@ public class SparqlClient {
     private String endpointUri;
 
     // Default query to know if server is up
-    private final String ASK_QUERY = "ASK WHERE { ?s ?p ?o }";
+    private static final String ASK_QUERY = "ASK WHERE { ?s ?p ?o }";
 
     /**
      * Creates a client using the address of the server.
@@ -176,7 +176,7 @@ public class SparqlClient {
         NodeList list = document.getElementsByTagName("boolean");
         Node xmlNode = list.item(0);
 
-        return xmlNode != null && xmlNode.getTextContent().equals("true");
+        return "true".equals(xmlNode.getTextContent());
     }
 
     /**
@@ -218,8 +218,7 @@ public class SparqlClient {
         builder.setPath("/sparql");
         builder.setParameter("query", queryString);
         builder.setParameter("output", "xml");
-        URI uri = builder.build();
-        return uri;
+        return builder.build();
     }
 
     /**

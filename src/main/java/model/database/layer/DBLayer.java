@@ -292,7 +292,7 @@ public class DBLayer {
     /**
      * Closes the connection of the database.
      */
-    public void finalize(){
+    public void closeConnection(){
 
         try {
             connection.close();

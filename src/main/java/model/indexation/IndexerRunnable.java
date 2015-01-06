@@ -12,7 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import model.database.DAO.InverseFileDAO;
+import model.database.dao.InverseFileDAO;
 
 /**
  * Class with the operations used by each thread in the Indexation process.
@@ -63,7 +63,7 @@ class IndexerRunnable implements Runnable {
             documentId = counter.getAndIncrement();
         }
 
-        invDAO.finalize();
+        invDAO.closeConnection();
     }
 
     /**

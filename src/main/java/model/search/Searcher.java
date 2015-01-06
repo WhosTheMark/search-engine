@@ -11,7 +11,7 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import model.database.DAO.RelevantDocumentDAO;
+import model.database.dao.RelevantDocumentDAO;
 import model.indexation.WordNormalizer;
 import model.search.calculators.RelevanceCalculator;
 
@@ -48,7 +48,7 @@ public class Searcher {
 
         relvDocDAO = new RelevantDocumentDAO();
         List<RelevantDocument> list = executeQuery(query);
-        relvDocDAO.finalize();
+        relvDocDAO.closeConnection();
         return list;
     }
 
@@ -152,7 +152,7 @@ public class Searcher {
             writeResultToFile(docs,i);
         }
 
-        relvDocDAO.finalize();
+        relvDocDAO.closeConnection();
     }
 
     /**
