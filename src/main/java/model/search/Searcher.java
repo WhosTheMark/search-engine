@@ -39,17 +39,23 @@ public class Searcher {
     }
 
     /**
-     * Executes a single query in the form of a String.
+     * Executes a single query in the form of a String. It writes the result to 
+     * a file too.
      * @param query the query to execute.
      * @return the list of relevant documents found already sorted.
      * @see RelevantDocument
      */
-    public List<RelevantDocument> executeSingleQuery(String query) {
+    public void executeSingleQuery(String query) {
 
         relvDocDAO = new RelevantDocumentDAO();
-        List<RelevantDocument> list = executeQuery(query);
+        List<RelevantDocument> list;
+
+        if(resultFolderExists()){
+            list = executeQuery(query);
+            writeResultToFile(list,1);
+        }
+
         relvDocDAO.closeConnection();
-        return list;
     }
 
     /**
@@ -116,23 +122,15 @@ public class Searcher {
      */
     public void executeQueriesFromFile(File file){
 
-        Scanner scanner = null;
+        try (Scanner scanner = new Scanner (file)){
 
-        try {
-            scanner = new Scanner (file);
+            if (resultFolderExists()){
+                executeQueries(scanner);
+            }
+
         } catch (FileNotFoundException e) {
             LOGGER.fatal("File " + file.getName() + "not found.", e);
-            return;
         }
-
-        if (!resultFolderExists()){
-            if (scanner != null) {
-                scanner.close();
-            }
-            return;
-        }
-
-        executeQueries(scanner);
 
         LOGGER.info("Search finished.");
     }
@@ -195,6 +193,8 @@ public class Searcher {
         if (!folder.exists()) {
             LOGGER.debug("Creating results folder {}.", folder.getAbsolutePath());
             folder.mkdir();
+        } else {
+            cleanDirectory(folder);
         }
 
         if (!folder.exists()) {
@@ -204,5 +204,18 @@ public class Searcher {
         }
 
         return true;
+    }
+
+    /**
+     * Deletes the files inside a folder.
+     * @param folder the folder to clean.
+     */
+    private void cleanDirectory(File folder) {
+
+        LOGGER.debug("Deleting the files inside the folder {}", folder.getAbsolutePath());
+
+        for (File file : folder.listFiles()){
+            file.delete();
+        }
     }
 }
