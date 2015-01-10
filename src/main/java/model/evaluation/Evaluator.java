@@ -119,10 +119,12 @@ public class Evaluator {
         LOGGER.entry(relevantDocSet,scanner);
 
         Evaluation eval = new Evaluation(relevantDocSet);
+        int i = 0;
 
-        while (scanner.hasNext(DOC_NAME)) {
+        while (scanner.hasNext(DOC_NAME) && i < Evaluation.MAX_PRECISION) {
             String doc = scanner.next(DOC_NAME);
             eval.checkDocument(doc);
+            ++i;
         }
 
         return LOGGER.exit(eval);

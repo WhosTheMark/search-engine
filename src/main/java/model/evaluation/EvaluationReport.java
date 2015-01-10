@@ -64,7 +64,7 @@ public class EvaluationReport {
     }
 
     /**
-     * Sums all the results, precision and rappel.
+     * Sums all the results, precision and recall.
      * @param evaluation where the precisions are stored.
      * @param list list of evaluations to sum.
      */
@@ -76,7 +76,9 @@ public class EvaluationReport {
             evaluation.precision5 += eval.precision5;
             evaluation.precision10 += eval.precision10;
             evaluation.precision25 += eval.precision25;
-            evaluation.averageRappel += eval.getRappel();
+            evaluation.recall5 += eval.recall5;
+            evaluation.recall10 += eval.recall10;
+            evaluation.recall25 += eval.recall25;
         }
 
         LOGGER.exit();
@@ -97,7 +99,9 @@ public class EvaluationReport {
             evaluation.precision5 /= (float)total;
             evaluation.precision10 /= (float)total;
             evaluation.precision25 /= (float)total;
-            evaluation.averageRappel /= (float)total;
+            evaluation.recall5 /= (float)total;
+            evaluation.recall10 /= (float)total;
+            evaluation.recall25 /= (float)total;
         }
 
         LOGGER.exit();
@@ -111,7 +115,7 @@ public class EvaluationReport {
         for (Evaluation eval: queriesEvaluations){
             builder.append("Query: " + i + "\n");
             builder.append(eval.toString());
-            builder.append("\n-------------------\n");
+            builder.append("\n---------------------------------\n");
             ++i;
         }
 
