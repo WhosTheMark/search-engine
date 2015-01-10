@@ -57,18 +57,18 @@ public class EvaluationReport {
 
         LOGGER.entry(queriesEvaluations);
         Evaluation evaluation = new Evaluation();
-        sumPrecisions(evaluation);
+        sumResults(evaluation);
         divideByTotal(evaluation);
 
         return LOGGER.exit(evaluation);
     }
 
     /**
-     * Sums all the precisions.
+     * Sums all the results, precision and rappel.
      * @param evaluation where the precisions are stored.
      * @param list list of evaluations to sum.
      */
-    private void sumPrecisions(Evaluation evaluation) {
+    private void sumResults(Evaluation evaluation) {
 
         LOGGER.entry(evaluation);
 
@@ -76,6 +76,7 @@ public class EvaluationReport {
             evaluation.precision5 += eval.precision5;
             evaluation.precision10 += eval.precision10;
             evaluation.precision25 += eval.precision25;
+            evaluation.averageRappel += eval.getRappel();
         }
 
         LOGGER.exit();
@@ -96,6 +97,7 @@ public class EvaluationReport {
             evaluation.precision5 /= (float)total;
             evaluation.precision10 /= (float)total;
             evaluation.precision25 /= (float)total;
+            evaluation.averageRappel /= (float)total;
         }
 
         LOGGER.exit();

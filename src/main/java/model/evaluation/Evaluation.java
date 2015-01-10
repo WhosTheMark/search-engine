@@ -7,7 +7,7 @@ import java.util.Set;
  */
 public class Evaluation {
 
-    public static final int MAX_PRECISION = 25;
+    private static final int MAX_PRECISION = 25;
 
     // Set that contains the list of relevant documents in the qrel file.
     private Set<String> relevantDocs;
@@ -17,6 +17,9 @@ public class Evaluation {
     float precision25 = 0;
     private int totalDocsFound = 0;
     private int relevantDocsFound = 0;
+
+    // For the final evaluation, TODO  new class with this.
+    float averageRappel = 0;
 
     /**
      * Creates a new Evaluation.
@@ -59,6 +62,15 @@ public class Evaluation {
         return precision25;
     }
 
+    public float getRappel() {
+
+        if (relevantDocs != null) {
+            return (float) totalDocsFound / (float) relevantDocs.size();
+        } else {
+            return averageRappel;
+        }
+    }
+
     /**
      * Checks if the document is relevant or not and updates precisions.
      * @param document to check.
@@ -95,6 +107,6 @@ public class Evaluation {
 
     public String toString(){
         return "P5: " + precision5 + "\nP10: " + precision10
-                + "\nP25: " + precision25;
+                + "\nP25: " + precision25 + "\nRappel: " + getRappel();
     }
 }
