@@ -52,10 +52,12 @@ class QueryEnhancer {
         List<String> list = new ArrayList<String>();
 
         for (String term : terms){
-            String trimmedTerm = term.trim();
+            String trimmedTerm = removeTrailingS(term.trim());
             List<String> labels = sparqlDAO.getOtherLabels(trimmedTerm);
+            List<String> subclassLabels = sparqlDAO.getSubClassLabels(trimmedTerm);
 
             addLabelsToList(labels, list);
+            addLabelsToList(subclassLabels, list);
         }
 
         LOGGER.debug("Found {} word(s) to enhance query: {}.", list.size(), list);
@@ -76,11 +78,20 @@ class QueryEnhancer {
             String[] normalizedLabels = WordNormalizer.split(label);
 
             for (String normLabel : normalizedLabels){
-                list.add(normLabel);
+                if (!list.contains(normLabel)){
+                    list.add(normLabel);
+                }
             }
         }
 
         LOGGER.exit();
+    }
+
+    public String removeTrailingS(String str) {
+        if (str.length() > 0 && str.charAt(str.length()-1)=='s') {
+          str = str.substring(0, str.length()-1);
+        }
+        return str;
     }
 
 }
