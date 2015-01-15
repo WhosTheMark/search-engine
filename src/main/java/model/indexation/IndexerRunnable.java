@@ -81,8 +81,17 @@ class IndexerRunnable implements Runnable {
         LOGGER.debug("Creating inverse file for document {}.", file.getName());
 
         Elements elems = parse(file);
+        //adding other tags
+        Elements elemsH1 = parseTags( file, "h1");
+        Elements elemsH2 = parseTags( file, "h2");
+        Elements elemsH3 = parseTags( file, "h3");
+        Elements elemsTitle = parseTags( file, "title");
         InverseFile invFile = new InverseFile(documentId, file.getName());
         addElems(elems, invFile, stopWordsSet);
+        addElems(elemsH1, invFile, stopWordsSet);
+        addElems(elemsH2, invFile, stopWordsSet);
+        addElems(elemsH3, invFile, stopWordsSet);
+        addElems(elemsTitle, invFile, stopWordsSet);
 
         LOGGER.exit(invFile);
         return invFile;
@@ -151,6 +160,25 @@ class IndexerRunnable implements Runnable {
 
         // Select all the tags from the HTML file
         return doc.select("*");
+    }
+    
+    private static Elements parseTags(File fileToParse, String tag) {
+    	LOGGER.debug("Using JSoup to parse {}.", fileToParse.getName());
+        Document doc;
+        Elements elems;
+
+        try {
+            doc = Jsoup.parse(fileToParse, "UTF-8", "");
+             elems = doc.select(tag);
+        } catch (IOException e) {
+            LOGGER.error("Could not parse file " + fileToParse.getName() + ".",e);
+            return new Elements();
+        }
+
+        // Select all the tags from the HTML file
+        return elems;
+    	
+    	
     }
 
 }
